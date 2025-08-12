@@ -1,9 +1,13 @@
+import items from '../../items.js';
+
 const skill = 'Woodcutting';
+const map = Object.fromEntries(items.map(i => [i.key, i]));
+const { twig, oak, yew } = map;
 
 export const nodes = [
-  {key:'twig', name:'Twigs', time:2000, yield:{twig:[1,2]}, xp:4, req:1},
-  {key:'oak', name:'Oak', time:3500, yield:{oak:[3,5]}, xp:8, req:5},
-  {key:'yew', name:'Yew', time:5000, yield:{yew:[6,8]}, xp:14, req:12},
+  {key: twig.key, name: 'Twigs', time: 2000, yield: {[twig.key]: [1, 2]}, xp: 4, req: 1},
+  {key: oak.key, name: 'Oak', time: 3500, yield: {[oak.key]: [3, 5]}, xp: 8, req: 5},
+  {key: yew.key, name: 'Yew', time: 5000, yield: {[yew.key]: [6, 8]}, xp: 14, req: 12},
 ];
 
 export function perform(state, node, {addInventory, addSkillXP, randInt}) {

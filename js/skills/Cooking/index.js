@@ -1,8 +1,12 @@
+import items from '../../items.js';
+
 const skill = 'Cooking';
+const map = Object.fromEntries(items.map(i => [i.key, i]));
+const { fish, twig, meal, bar } = map;
 
 export const nodes = [
-  {key:'meal', name:'Cook Meal', time:3500, consume:{fish:2, twig:1}, yield:{meal:[1,2]}, xp:10, req:3},
-  {key:'feast', name:'Hearty Feast', time:5500, consume:{meal:2, bar:1}, yield:{gold:[10,16]}, xp:14, req:11},
+  {key: meal.key, name: 'Cook Meal', time: 3500, consume: {[fish.key]: 2, [twig.key]: 1}, yield: {[meal.key]: [1, 2]}, xp: 10, req: 3},
+  {key: 'feast', name: 'Hearty Feast', time: 5500, consume: {[meal.key]: 2, [bar.key]: 1}, yield: {gold: [10, 16]}, xp: 14, req: 11},
 ];
 
 export function perform(state, node, {addInventory, addSkillXP, randInt, mul}) {

@@ -1,8 +1,12 @@
+import items from '../../items.js';
+
 const skill = 'Smithing';
+const map = Object.fromEntries(items.map(i => [i.key, i]));
+const { iron, bar } = map;
 
 export const nodes = [
-  {key:'bar', name:'Smelt Bar', time:4000, consume:{iron:3}, yield:{bar:[1,1]}, xp:10, req:3},
-  {key:'plate', name:'Forge Plate', time:6000, consume:{bar:3}, yield:{gold:[7,12]}, xp:14, req:10},
+  {key: bar.key, name: 'Smelt Bar', time: 4000, consume: {[iron.key]: 3}, yield: {[bar.key]: [1, 1]}, xp: 10, req: 3},
+  {key: 'plate', name: 'Forge Plate', time: 6000, consume: {[bar.key]: 3}, yield: {gold: [7, 12]}, xp: 14, req: 10},
 ];
 
 export function perform(state, node, {addInventory, addSkillXP, randInt, mul}) {
