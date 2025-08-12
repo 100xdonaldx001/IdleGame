@@ -109,8 +109,22 @@ export function renderCrafting() {
 }
 
 export function renderUpgrades() {
+  const sel = el('#upgFilter');
+  if (sel && !sel.dataset.init) {
+    sel.innerHTML = '<option value="all">All</option>';
+    const types = Array.from(new Set(upgrades.map(u => u.type)));
+    types.forEach(t => {
+      const opt = document.createElement('option');
+      opt.value = t;
+      opt.textContent = t.charAt(0).toUpperCase() + t.slice(1);
+      sel.appendChild(opt);
+    });
+    sel.addEventListener('change', renderUpgrades);
+    sel.dataset.init = '1';
+  }
+  const filter = sel ? sel.value : 'all';
   const g = el('#upgGrid'); g.innerHTML = '';
-  upgrades.forEach(u => {
+  upgrades.filter(u => filter === 'all' || u.type === filter).forEach(u => {
     const lvl = data.upgrades[u.key] || 0; const maxed = lvl >= u.max;
     const cost = Math.floor(u.cost * Math.pow(1.75, lvl));
     const can = canAfford(cost) && !maxed;
