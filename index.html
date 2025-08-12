@@ -1,104 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Idle Foundry — single‑file 2D idle game</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Idle Foundry — single‑file 2D idle game</title>
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-<header>
-  <h1>Idle Foundry</h1>
-  <span class="pill" id="version">v1.0.1</span>
-  <span class="pill" id="saveInfo">…</span>
-  <div style="margin-left:auto" class="row">
-    <button class="btn" id="btnExport">Export</button>
-    <button class="btn" id="btnImport">Import</button>
-    <button class="btn warn" id="btnHardReset" title="Reset all progress (keeps nothing)">Hard Reset</button>
+  <div id="header"></div>
+  <div class="wrap">
+    <aside id="sidebar"></aside>
+    <main id="content"></main>
   </div>
-</header>
-<div class="wrap">
-  <aside>
-    <div class="panel" style="margin:10px">
-      <div class="phead"><b>Stats</b><small class="muted" id="tickInfo">t=0</small></div>
-      <div class="list" id="statList"></div>
-    </div>
-    <div class="panel" style="margin:10px">
-      <div class="phead"><b>Skills</b><small class="muted">Train one at a time</small></div>
-      <div class="list" id="skillList"></div>
-    </div>
-    <div class="panel" style="margin:10px">
-      <div class="phead"><b>Active Task</b><small id="taskETA" class="muted">—</small></div>
-      <div class="list" id="taskPanel"></div>
-    </div>
-  </aside>
-  <main>
-    <div style="padding:10px;display:grid;gap:12px">
-      <div class="row tabs" role="tablist" id="tabs"></div>
-
-      <section class="panel" id="tab-overview" role="tabpanel">
-        <div class="phead"><b>Overview</b><small class="muted">A compact look at your empire</small></div>
-        <div class="grid" id="overviewGrid"></div>
-      </section>
-
-      <section class="panel" id="tab-inventory" role="tabpanel" hidden>
-        <div class="phead"><b>Inventory</b><small class="muted">Raw resources & materials</small></div>
-        <div class="grid" id="invGrid"></div>
-      </section>
-
-      <section class="panel" id="tab-crafting" role="tabpanel" hidden>
-        <div class="phead"><b>Crafting</b><small class="muted">Turn resources into useful goods</small></div>
-        <div class="grid" id="craftGrid"></div>
-      </section>
-
-      <section class="panel" id="tab-upgrades" role="tabpanel" hidden>
-        <div class="phead"><b>Upgrades</b><small class="muted">Permanent boosts</small></div>
-        <div class="grid" id="upgGrid"></div>
-      </section>
-
-      <section class="panel" id="tab-combat" role="tabpanel" hidden>
-        <div class="phead"><b>Combat</b><small class="muted">Auto-battle for loot</small></div>
-        <div class="split">
-          <div>
-            <canvas id="arena" width="480" height="320"></canvas>
-            <div class="row" style="margin-top:8px">
-              <button class="btn" id="btnFight">Start/Stop</button>
-              <span class="chip" id="combatInfo">Idle</span>
-            </div>
-          </div>
-          <div>
-            <div class="list" id="combatStats"></div>
-            <div class="phead" style="margin-top:10px"><b>Enemies</b><small class="muted">Stronger foes, better loot</small></div>
-            <div class="list" id="enemyList"></div>
-          </div>
-        </div>
-      </section>
-
-      <section class="panel" id="tab-achievements" role="tabpanel" hidden>
-        <div class="phead"><b>Achievements</b><small class="muted">Flex a little</small></div>
-        <div class="grid" id="achGrid"></div>
-      </section>
-
-      <section class="panel" id="tab-settings" role="tabpanel" hidden>
-        <div class="phead"><b>Settings</b><small class="muted">QoL, data & tests</small></div>
-        <div class="list">
-          <label class="item"><span>Autosave every 30s</span><input type="checkbox" id="optAutosave"></label>
-          <label class="item"><span>Show tick debug</span><input type="checkbox" id="optDebug"></label>
-          <div class="item"><span>Offline progress cap</span><span><input type="number" id="optOfflineHours" min="0" max="24" step="1" style="width:70px"> h</span></div>
-        </div>
-        <div class="footer">
-          <button class="btn" id="btnSaveNow">Save Now</button>
-          <button class="btn" id="btnClaimOffline">Reapply Offline Gain</button>
-          <button class="btn" id="btnRunTests" title="Run built-in sanity tests">Run Built‑in Tests</button>
-        </div>
-        <p class="hint" id="testResults">Tests: not run yet.</p>
-        <p class="hint">All data is stored locally in <code>localStorage</code>.</p>
-      </section>
-
-    </div>
-  </main>
-</div>
-<div id="toast" class="toast">Saved.</div>
-<script type="module" src="js/main.js"></script>
+  <div id="toast" class="toast">Saved.</div>
+  <script type="module" src="js/bootstrap.js"></script>
 </body>
 </html>
