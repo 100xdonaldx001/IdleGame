@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Idle Foundry — single‑file 2D idle game</title>
+<style>
+  :root{
+    --bg:#0f1220; --panel:#171a2b; --soft:#1e2238; --accent:#7dd3fc; --accent2:#a78bfa;
+    --text:#e6e9f5; --muted:#9aa3b2; --good:#10b981; --bad:#ef4444; --warn:#f59e0b;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Arial,sans-serif;background:radial-gradient(1200px 800px at 70% -10%,#1b2040 0%,var(--bg) 40%,#0b0e18 100%) fixed;color:var(--text)}
+  header{display:flex;align-items:center;gap:.75rem;padding:10px 14px;border-bottom:1px solid #23263f;background:linear-gradient(180deg,#14182c,#101426)}
+  h1{font-size:18px;margin:0;font-weight:700;letter-spacing:.3px}
+  .pill{padding:.25rem .5rem;border:1px solid #2a2e49;border-radius:999px;background:#12162a;color:var(--muted);font-size:12px}
+  .wrap{display:grid;grid-template-columns:260px 1fr;gap:12px;height:calc(100% - 54px)}
+  aside{overflow:auto;border-right:1px solid #23263f;background:linear-gradient(180deg,#12162a,#0c1020)}
+  main{overflow:auto}
+  .panel{background:var(--panel);border:1px solid #23263f;border-radius:12px;padding:12px}
+  .phead{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+  .bar{height:10px;background:#11152a;border:1px solid #2a2e49;border-radius:8px;overflow:hidden}
+  .bar>span{display:block;height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));width:0%}
+  .tabs{display:flex;gap:6px;flex-wrap:wrap}
+  .tab{padding:8px 10px;border:1px solid #2a2e49;background:var(--soft);border-radius:8px;font-size:13px;cursor:pointer}
+  .tab[aria-selected="true"]{outline:1.5px solid var(--accent);}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px}
+  .btn{display:inline-flex;align-items:center;gap:6px;padding:.5rem .7rem;border:1px solid #2a2e49;background:#13172c;color:var(--text);border-radius:9px;cursor:pointer}
+  .btn:disabled{opacity:.55;cursor:not-allowed}
+  .btn.good{background:#122b22;border-color:#1b6a56}
+  .btn.bad{background:#2b1215;border-color:#6a1b23}
+  .btn.warn{background:#2b2412;border-color:#6a5b1b}
+  small.muted{color:var(--muted)}
+  .row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .kv{display:flex;align-items:baseline;gap:6px}
+  .kv b{font-size:18px}
+  .stat{padding:8px;border:1px solid #2a2e49;border-radius:10px;background:#0f1326;display:flex;justify-content:space-between;gap:8px}
+  .split{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .list{display:grid;gap:6px}
+  .list .item{display:flex;justify-content:space-between;gap:10px;padding:8px;border:1px solid #2a2e49;background:#0f1326;border-radius:10px}
+  .hint{font-size:12px;color:var(--muted)}
+  .chip{padding:2px 6px;border:1px solid #2a2e49;border-radius:999px;font-size:12px;background:#0d1228}
+  .footer{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+  .danger{color:#fca5a5}
+  canvas{background:#0b0f22;border:1px solid #2a2e49;border-radius:12px;width:100%;aspect-ratio:3/2;image-rendering:pixelated}
+  .toast{position:fixed;right:10px;bottom:10px;padding:10px 12px;background:#101426;border:1px solid #2a2e49;border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.3);opacity:0;transform:translateY(8px);transition:.25s}
+  .toast.show{opacity:1;transform:none}
+  @media (max-width: 900px){.wrap{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header>
+  <h1>Idle Foundry</h1>
+  <span class="pill" id="version">v1.0.1</span>
+  <span class="pill" id="saveInfo">…</span>
+  <div style="margin-left:auto" class="row">
+    <button class="btn" id="btnExport">Export</button>
+    <button class="btn" id="btnImport">Import</button>
+    <button class="btn warn" id="btnHardReset" title="Reset all progress (keeps nothing)">Hard Reset</button>
+  </div>
+</header>
+<div class="wrap">
+  <aside>
+    <div class="panel" style="margin:10px">
+      <div class="phead"><b>Stats</b><small class="muted" id="tickInfo">t=0</small></div>
+      <div class="list" id="statList"></div>
+    </div>
+    <div class="panel" style="margin:10px">
+      <div class="phead"><b>Skills</b><small class="muted">Train one at a time</small></div>
+      <div class="list" id="skillList"></div>
+    </div>
+    <div class="panel" style="margin:10px">
+      <div class="phead"><b>Active Task</b><small id="taskETA" class="muted">—</small></div>
+      <div class="list" id="taskPanel"></div>
+    </div>
+  </aside>
+  <main>
+    <div style="padding:10px;display:grid;gap:12px">
+      <div class="row tabs" role="tablist" id="tabs"></div>
+
+      <section class="panel" id="tab-overview" role="tabpanel">
+        <div class="phead"><b>Overview</b><small class="muted">A compact look at your empire</small></div>
+        <div class="grid" id="overviewGrid"></div>
+      </section>
+
+      <section class="panel" id="tab-inventory" role="tabpanel" hidden>
+        <div class="phead"><b>Inventory</b><small class="muted">Raw resources & materials</small></div>
+        <div class="grid" id="invGrid"></div>
+      </section>
+
+      <section class="panel" id="tab-crafting" role="tabpanel" hidden>
+        <div class="phead"><b>Crafting</b><small class="muted">Turn resources into useful goods</small></div>
+        <div class="grid" id="craftGrid"></div>
+      </section>
+
+      <section class="panel" id="tab-upgrades" role="tabpanel" hidden>
+        <div class="phead"><b>Upgrades</b><small class="muted">Permanent boosts</small></div>
+        <div class="grid" id="upgGrid"></div>
+      </section>
+
+      <section class="panel" id="tab-combat" role="tabpanel" hidden>
+        <div class="phead"><b>Combat</b><small class="muted">Auto-battle for loot</small></div>
+        <div class="split">
+          <div>
+            <canvas id="arena" width="480" height="320"></canvas>
+            <div class="row" style="margin-top:8px">
+              <button class="btn" id="btnFight">Start/Stop</button>
+              <span class="chip" id="combatInfo">Idle</span>
+            </div>
+          </div>
+          <div>
+            <div class="list" id="combatStats"></div>
+            <div class="phead" style="margin-top:10px"><b>Enemies</b><small class="muted">Stronger foes, better loot</small></div>
+            <div class="list" id="enemyList"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel" id="tab-achievements" role="tabpanel" hidden>
+        <div class="phead"><b>Achievements</b><small class="muted">Flex a little</small></div>
+        <div class="grid" id="achGrid"></div>
+      </section>
+
+      <section class="panel" id="tab-settings" role="tabpanel" hidden>
+        <div class="phead"><b>Settings</b><small class="muted">QoL, data & tests</small></div>
+        <div class="list">
+          <label class="item"><span>Autosave every 30s</span><input type="checkbox" id="optAutosave"></label>
+          <label class="item"><span>Show tick debug</span><input type="checkbox" id="optDebug"></label>
+          <div class="item"><span>Offline progress cap</span><span><input type="number" id="optOfflineHours" min="0" max="24" step="1" style="width:70px"> h</span></div>
+        </div>
+        <div class="footer">
+          <button class="btn" id="btnSaveNow">Save Now</button>
+          <button class="btn" id="btnClaimOffline">Reapply Offline Gain</button>
+          <button class="btn" id="btnRunTests" title="Run built-in sanity tests">Run Built‑in Tests</button>
+        </div>
+        <p class="hint" id="testResults">Tests: not run yet.</p>
+        <p class="hint">All data is stored locally in <code>localStorage</code>.</p>
+      </section>
+
+    </div>
+  </main>
+</div>
+<div id="toast" class="toast">Saved.</div>
+<script>
+/**
+ * Idle Foundry — a compact Melvor-like 2D idle in one file.
+ * Systems: skills, inventory, crafting, upgrades, auto-combat, achievements,
+ * autosave + offline progress, export/import, simple 2D arena rendering.
+ */
+(function(){
+  const VERSION = '1.0.1';
+  const TICK_MS = 250; // game ticks
+  const SAVE_KEY = 'idleFoundrySaveV1';
+
+  // --- DATA MODEL ----------------------------------------------------------
+  const data = {
+    meta: {version: VERSION, created: Date.now(), last: Date.now(), autosave:true, debug:false, offlineCapHrs:8},
+    gold: 0,
+    xp: 0,
+    skills: {
+      Woodcutting: {lvl:1, xp:0, task:null},
+      Mining: {lvl:1, xp:0, task:null},
+      Fishing: {lvl:1, xp:0, task:null},
+      Smithing: {lvl:1, xp:0, task:null},
+      Cooking: {lvl:1, xp:0, task:null},
+      Combat: {lvl:1, xp:0, task:null}
+    },
+    inventory: {wood:0, ore:0, fish:0, bar:0, meal:0, gem:0, skin:0},
+    upgrades: {},
+    craftingQueue: [],
+    activeSkill: 'Woodcutting',
+    // combat
+    combat: {running:false, area:'Glade', player:{hpMax:50,hp:50,atk:4,def:2,spd:1.0,crit:0.05}, enemyKey:'Slime', progress:0},
+    // achievements simple
+    ach: {}
+  };
+
+  const skills = ['Woodcutting','Mining','Fishing','Smithing','Cooking','Combat'];
+
+  // Base nodes (activities) per skill
+  const nodes = {
+    Woodcutting:[
+      {key:'twig', name:'Twigs', time:2000, yield:{wood:[1,2]}, xp:4, req:1},
+      {key:'oak', name:'Oak', time:3500, yield:{wood:[3,5]}, xp:8, req:5},
+      {key:'yew', name:'Yew', time:5000, yield:{wood:[6,8]}, xp:14, req:12},
+    ],
+    Mining:[
+      {key:'pebble', name:'Pebbles', time:2500, yield:{ore:[1,2]}, xp:5, req:1},
+      {key:'iron', name:'Iron Vein', time:4000, yield:{ore:[3,5]}, xp:10, req:6},
+      {key:'mythril', name:'Mythril Vein', time:6000, yield:{ore:[6,8], gem:[0,1]}, xp:16, req:14},
+    ],
+    Fishing:[
+      {key:'pond', name:'Pond', time:2500, yield:{fish:[1,2]}, xp:5, req:1},
+      {key:'river', name:'River', time:3800, yield:{fish:[3,4]}, xp:9, req:7},
+      {key:'sea', name:'Open Sea', time:5200, yield:{fish:[5,7], skin:[0,1]}, xp:15, req:13},
+    ],
+    Smithing:[
+      {key:'bar', name:'Smelt Bar', time:4000, consume:{ore:3}, yield:{bar:[1,1]}, xp:10, req:3},
+      {key:'plate', name:'Forge Plate', time:6000, consume:{bar:3}, yield:{gold:[7,12]}, xp:14, req:10},
+    ],
+    Cooking:[
+      {key:'meal', name:'Cook Meal', time:3500, consume:{fish:2, wood:1}, yield:{meal:[1,2]}, xp:10, req:3},
+      {key:'feast', name:'Hearty Feast', time:5500, consume:{meal:2, bar:1}, yield:{gold:[10,16]} , xp:14, req:11},
+    ],
+    Combat:[
+      {key:'train', name:'Sparring', time:3000, yield:{xp:[6,9], gold:[1,3]}, xp:0, req:1}
+    ]
+  };
+
+  // Many upgrades
+  const upgrades = [
+    // Global
+    {key:'pack1', name:'Bigger Pockets', desc:'+25% inventory gains', cost:50, max:1, type:'global', eff:{gain:1.25}},
+    {key:'focus1', name:'Focused Mind', desc:'+20% XP across all skills', cost:120, max:1, type:'global', eff:{xp:1.2}},
+    {key:'hustle', name:'Hustle', desc:'+10% global speed', cost:150, max:3, type:'global', eff:{speed:1.1}},
+
+    // Woodcutting
+    {key:'axe1', name:'Copper Axe', desc:'Woodcutting speed +25%', cost:60, max:1, type:'Woodcutting', eff:{speed:1.25}},
+    {key:'axe2', name:'Iron Axe', desc:'Woodcutting yield +20%', cost:120, max:1, type:'Woodcutting', eff:{gain:1.2}},
+    {key:'lumberjack', name:'Lumberjack Drone', desc:'Auto Woodcut while offline (50%)', cost:220, max:1, type:'Woodcutting', eff:{offline:0.5}},
+
+    // Mining
+    {key:'pick1', name:'Copper Pick', desc:'Mining speed +25%', cost:60, max:1, type:'Mining', eff:{speed:1.25}},
+    {key:'pick2', name:'Iron Pick', desc:'Mining yield +20%', cost:120, max:1, type:'Mining', eff:{gain:1.2}},
+    {key:'prospector', name:'Prospector Bot', desc:'Auto Mine while offline (50%)', cost:220, max:1, type:'Mining', eff:{offline:0.5}},
+
+    // Fishing
+    {key:'rod1', name:'Reed Rod', desc:'Fishing speed +25%', cost:60, max:1, type:'Fishing', eff:{speed:1.25}},
+    {key:'rod2', name:'Iron Rod', desc:'Fishing yield +20%', cost:120, max:1, type:'Fishing', eff:{gain:1.2}},
+    {key:'trawler', name:'Tiny Trawler', desc:'Auto Fish while offline (50%)', cost:220, max:1, type:'Fishing', eff:{offline:0.5}},
+
+    // Smithing & Cooking
+    {key:'bellows', name:'Bellows', desc:'Smithing speed +20%', cost:140, max:1, type:'Smithing', eff:{speed:1.2}},
+    {key:'chefhat', name:'Chef Hat', desc:'Cooking speed +20%', cost:140, max:1, type:'Cooking', eff:{speed:1.2}},
+    {key:'artisan', name:'Artisan Craft', desc:'+10% value from crafted goods', cost:200, max:2, type:'craft', eff:{craftValue:1.1}},
+
+    // Combat
+    {key:'blade', name:'Iron Blade', desc:'+2 ATK', cost:100, max:1, type:'combatFlat', eff:{atk:+2}},
+    {key:'mail', name:'Mail Armor', desc:'+4 DEF, +10 HP', cost:150, max:1, type:'combatFlat', eff:{def:+4,hp:+10}},
+    {key:'quicks', name:'Quick Steps', desc:'+10% attack speed', cost:180, max:2, type:'combatMul', eff:{spd:1.1}},
+  ];
+
+  const enemies = {
+    Glade:[
+      {key:'Slime', hp:30, atk:3, def:1, spd:1.0, gold:[2,5], drops:{skin:[0,1]}},
+      {key:'Boar', hp:45, atk:5, def:2, spd:0.9, gold:[5,9], drops:{skin:[1,2]}},
+    ],
+    Cavern:[
+      {key:'Bat', hp:40, atk:4, def:2, spd:1.2, gold:[5,10], drops:{gem:[0,1]}},
+      {key:'Golem', hp:80, atk:6, def:4, spd:0.8, gold:[10,18], drops:{gem:[1,2]}},
+    ]
+  };
+
+  const areas = Object.keys(enemies);
+
+  // Achievements (simple set)
+  const achievements = [
+    {key:'rich1', name:'First Gold', cond:s=>s.gold>=100, reward:50},
+    {key:'miner5', name:'Miner Lv.5', cond:s=>s.skills.Mining.lvl>=5, reward:30},
+    {key:'cook10', name:'Chef Lv.10', cond:s=>s.skills.Cooking.lvl>=10, reward:100},
+    // FIX: use getStat helper (defined below) to read from stats
+    {key:'slime50', name:'Slime Smasher', cond:s=>getStat('slimeKills')>=50, reward:80},
+  ];
+
+  // Trackable counters
+  const stats = { slimeKills:0, fightsWon:0, totalTicks:0 };
+
+  // --- UTILITIES -----------------------------------------------------------
+  const el = sel=>document.querySelector(sel);
+  const fmt = n=>Math.floor(n).toLocaleString();
+  const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+  const randInt=(a,b)=>Math.floor(Math.random()*(b-a+1))+a;
+
+  // NEW: small helper to safely read stats; fixes ReferenceError from achievements
+  function getStat(key){ return Number(stats[key]||0); }
+
+  function levelFromXP(xp){
+    // simple quadratic scaling
+    let lvl=1, need=20;
+    while(xp>=need){ xp-=need; lvl++; need=Math.floor(need*1.25+10); if(lvl>=99) break; }
+    return lvl;
+  }
+
+  function addInventory(key, amount){ data.inventory[key]=(data.inventory[key]||0)+amount; }
+  function canAfford(cost){ return data.gold>=cost; }
+
+  function applyUpgradeEffects(){
+    // recompute combat stats base
+    const p=data.combat.player;
+    p.hpMax=50; p.atk=4; p.def=2; p.spd=1.0;
+    let hpFlat=0;
+    for(const k in data.upgrades){
+      const u=upgrades.find(v=>v.key===k); if(!u) continue;
+      const lvl=data.upgrades[k];
+      if(u.type==='combatFlat'){ if(u.eff.atk) p.atk+=u.eff.atk*lvl; if(u.eff.def) p.def+=u.eff.def*lvl; if(u.eff.hp) hpFlat+=u.eff.hp*lvl; }
+      if(u.type==='combatMul'){ if(u.eff.spd) p.spd*=Math.pow(u.eff.spd,lvl); }
+    }
+    p.hpMax+=hpFlat; p.hp=clamp(p.hp,1,p.hpMax);
+  }
+
+  const mul = {
+    globalGain:()=>productOf(u=>u.type==='global'&&u.eff.gain),
+    globalXP:  ()=>productOf(u=>u.type==='global'&&u.eff.xp),
+    globalSpeed:()=>productOf(u=>u.type==='global'&&u.eff.speed),
+    skillGain:(skill)=>productOf(u=>u.type===skill&&u.eff.gain),
+    skillSpeed:(skill)=>productOf(u=>u.type===skill&&u.eff.speed),
+    craftValue:()=>productOf(u=>u.type==='craft'&&u.eff.craftValue),
+    offlineFrac:(skill)=>sumOf(u=>u.type===skill&&u.eff.offline),
+  };
+  function productOf(pred){
+    let m=1; for(const k in data.upgrades){ const u=upgrades.find(v=>v.key===k); if(u && pred(u)) m*=Math.pow(Object.values(u.eff)[0], data.upgrades[k]); }
+    return m;
+  }
+  function sumOf(pred){ let s=0; for(const k in data.upgrades){ const u=upgrades.find(v=>v.key===k); if(u && pred(u)){ const key=Object.keys(u.eff)[0]; s+=u.eff[key]*data.upgrades[k]; } } return s; }
+
+  // --- PERSISTENCE ---------------------------------------------------------
+  function save(){
+    data.meta.last=Date.now();
+    localStorage.setItem(SAVE_KEY, JSON.stringify({data, stats}));
+    showToast('Saved.');
+    el('#saveInfo').textContent = 'Saved at ' + new Date(data.meta.last).toLocaleTimeString();
+  }
+  function load(){
+    const raw = localStorage.getItem(SAVE_KEY);
+    if(!raw){ data.gold=25; addInventory('wood',3); addInventory('ore',2); }
+    else{
+      try{
+        const obj = JSON.parse(raw);
+        Object.assign(data, obj.data||{});
+        Object.assign(stats, obj.stats||{});
+        applyUpgradeEffects();
+      }catch(e){ console.warn('Load failed', e); }
+    }
+    el('#optAutosave').checked = !!data.meta.autosave;
+    el('#optDebug').checked = !!data.meta.debug;
+    el('#optOfflineHours').value = data.meta.offlineCapHrs;
+  }
+
+  function exportSave(){
+    const b64 = btoa(unescape(encodeURIComponent(JSON.stringify({data,stats}))));
+    navigator.clipboard.writeText(b64);
+    showToast('Save copied to clipboard.');
+  }
+  async function importSave(){
+    const b64 = prompt('Paste your exported save code:');
+    if(!b64) return;
+    try{
+      const obj = JSON.parse(decodeURIComponent(escape(atob(b64))));
+      Object.assign(data, obj.data||{});
+      Object.assign(stats, obj.stats||{});
+      applyUpgradeEffects();
+      save();
+      renderAll();
+      showToast('Imported.');
+    }catch(e){ alert('Invalid code'); }
+  }
+
+  function hardReset(){
+    if(confirm('This will erase ALL progress. Continue?')){
+      localStorage.removeItem(SAVE_KEY); location.reload();
+    }
+  }
+
+  // --- OFFLINE PROGRESS ----------------------------------------------------
+  function applyOfflineProgress(){
+    const now = Date.now();
+    const diffMs = now - (data.meta.last||now);
+    const capMs = (data.meta.offlineCapHrs||8)*3600*1000;
+    const applyMs = Math.min(diffMs, capMs);
+    if(applyMs<=0) return 0;
+    const ticks = Math.floor(applyMs / TICK_MS);
+    // Only passive via offline bots per skill
+    const skillKeys=['Woodcutting','Mining','Fishing'];
+    for(const s of skillKeys){
+      const frac = mul.offlineFrac(s); if(!frac) continue;
+      const node = nodes[s][0]; // basic node
+      const effectiveSpeed = node.time / (mul.globalSpeed()*mul.skillSpeed(s));
+      const cycles = Math.floor((applyMs*frac)/effectiveSpeed);
+      if(cycles>0){
+        const range=node.yield; for(const k in range){ const [a,b]=range[k]; addInventory(k, cycles*randInt(a,b)); }
+        const xpGain = cycles*node.xp*mul.globalXP();
+        addSkillXP(s, xpGain);
+      }
+    }
+    data.gold += Math.floor(ticks/40); // trickle
+    return applyMs;
+  }
+
+  // --- RENDERING -----------------------------------------------------------
+  function tabButton(id, label){
+    const b=document.createElement('button'); b.className='tab'; b.role='tab'; b.textContent=label; b.dataset.tab=id; b.addEventListener('click',()=>activateTab(id,b)); return b;
+  }
+  function activateTab(id, btn){
+    document.querySelectorAll('[role="tabpanel"]').forEach(p=>p.hidden=true);
+    el('#tab-'+id).hidden=false;
+    document.querySelectorAll('.tab').forEach(t=>t.setAttribute('aria-selected','false'));
+    if(btn) btn.setAttribute('aria-selected','true');
+  }
+
+  function renderTabs(){
+    const t=el('#tabs'); t.innerHTML='';
+    const list=[['overview','Overview'],['inventory','Inventory'],['crafting','Crafting'],['upgrades','Upgrades'],['combat','Combat'],['achievements','Achievements'],['settings','Settings']];
+    list.forEach(([id,label],i)=>{ const b=tabButton(id,label); if(i===0) b.setAttribute('aria-selected','true'); t.appendChild(b); });
+    activateTab('overview');
+  }
+
+  function renderStats(){
+    const s=el('#statList'); s.innerHTML='';
+    const pairs=[['Gold',fmt(data.gold)],['XP',fmt(data.xp)],['Ticks',fmt(stats.totalTicks)]];
+    pairs.forEach(([k,v])=>{ const d=document.createElement('div'); d.className='stat'; d.innerHTML=`<span>${k}</span><b>${v}</b>`; s.appendChild(d); });
+  }
+
+  function renderSkills(){
+    const s=el('#skillList'); s.innerHTML='';
+    for(const name of skills){
+      const sk=data.skills[name];
+      const row=document.createElement('div'); row.className='item';
+      const active = data.activeSkill===name;
+      row.innerHTML=`<div><b>${name}</b><div class="bar"><span style="width:${(sk.xp%100)/1}%"></span></div><small class="muted">Lv ${sk.lvl} · ${fmt(sk.xp)} XP</small></div>
+      <div class="row"><button class="btn ${active?'good':''}">${active?'Training':'Train'}</button></div>`;
+      row.querySelector('button').addEventListener('click',()=>{ data.activeSkill=name; renderSkills(); renderTaskPanel(); });
+      s.appendChild(row);
+    }
+  }
+
+  function nodeButton(skill,node){
+    const b=document.createElement('button'); b.className='btn'; b.textContent=node.name; b.title=`${node.time/1000}s · +${Object.entries(node.yield||{}).map(([k,[a,b]])=>`${a}-${b} ${k}`).join(', ')}${node.consume? ' · Cost: '+Object.entries(node.consume).map(([k,v])=>`${v} ${k}`).join(', '):''} · +${node.xp} XP`;
+    b.addEventListener('click',()=>{ data.skills[skill].task=node.key; renderTaskPanel(); });
+    return b;
+  }
+
+  function renderTaskPanel(){
+    const p=el('#taskPanel'); p.innerHTML='';
+    const sk=data.skills[data.activeSkill];
+    const list=nodes[data.activeSkill];
+    list.forEach(node=>{
+      const row=document.createElement('div'); row.className='item';
+      const locked = sk.lvl < node.req;
+      row.innerHTML = `<div><b>${node.name}</b><div class="hint">Req Lv.${node.req} · ${node.time/1000}s</div></div>`;
+      const b=nodeButton(data.activeSkill,node); if(locked) b.disabled=true; if(sk.task===node.key) b.classList.add('good');
+      row.appendChild(b); p.appendChild(row);
+    });
+  }
+
+  function renderOverview(){
+    const g=el('#overviewGrid'); g.innerHTML='';
+    const cards=[
+      ['Gold', `Earned from many actions.`, `<div class="kv"><b>${fmt(data.gold)}</b><small class="muted">coins</small></div>`],
+      ['Inventory', `Your current stock.`, Object.entries(data.inventory).map(([k,v])=>`<span class="chip">${k}: ${fmt(v)}</span>`).join(' ')],
+      ['Training', `Current skill & task.`, `<div>${data.activeSkill} → <b>${(data.skills[data.activeSkill].task||'Choose a node')}</b></div>`],
+      ['Global Multipliers', `From upgrades.`, `<div class="list">
+        <div class="item"><span>Gain</span><b>x${mul.globalGain().toFixed(2)}</b></div>
+        <div class="item"><span>XP</span><b>x${mul.globalXP().toFixed(2)}</b></div>
+        <div class="item"><span>Speed</span><b>x${mul.globalSpeed().toFixed(2)}</b></div>
+      </div>`],
+    ];
+    for(const [title,sub,body] of cards){ const card=document.createElement('div'); card.className='panel'; card.innerHTML=`<div class="phead"><b>${title}</b><small class="muted">${sub}</small></div>${body}`; g.appendChild(card); }
+  }
+
+  function renderInventory(){
+    const g=el('#invGrid'); g.innerHTML='';
+    for(const [k,v] of Object.entries(data.inventory)){
+      const card=document.createElement('div'); card.className='panel';
+      card.innerHTML=`<div class="phead"><b>${k}</b><small class="muted">Resource</small></div><div class="kv"><b>${fmt(v)}</b></div>`;
+      g.appendChild(card);
+    }
+  }
+
+  function renderCrafting(){
+    const g=el('#craftGrid'); g.innerHTML='';
+    const list=[...nodes.Smithing, ...nodes.Cooking];
+    list.forEach(n=>{
+      const card=document.createElement('div'); card.className='panel';
+      const canAff = n.consume? Object.entries(n.consume).every(([k,v])=> (data.inventory[k]||0)>=v ):true;
+      const btn=`<button class="btn" ${!canAff?'disabled':''}>Craft</button>`;
+      card.innerHTML=`<div class="phead"><b>${n.name}</b><small class="muted">${n.time/1000}s</small></div>
+      <div class="list">
+        <div class="item"><span>Costs</span><span>${n.consume?Object.entries(n.consume).map(([k,v])=>`${v} ${k}`).join(', '):'—'}</span></div>
+        <div class="item"><span>Yields</span><span>${Object.entries(n.yield).map(([k,[a,b]])=>`${a}-${b} ${k}`).join(', ')}</span></div>
+      </div>
+      <div class="footer">${btn}<small class="muted">+${n.xp} XP</small></div>`;
+      const b=card.querySelector('button'); b.addEventListener('click',()=>queueCraft(n));
+      g.appendChild(card);
+    });
+  }
+
+  function queueCraft(n){
+    if(n.consume && !Object.entries(n.consume).every(([k,v])=> (data.inventory[k]||0)>=v )) return;
+    // pay
+    if(n.consume) for(const [k,v] of Object.entries(n.consume)) data.inventory[k]-=v;
+    data.craftingQueue.push({key:n.key, timeLeft: Math.floor(n.time / (mul.globalSpeed()* (n.key==='plate'||n.key==='feast'?1:1))) , origin:n});
+    showToast('Queued '+n.name);
+  }
+
+  function renderUpgrades(){
+    const g=el('#upgGrid'); g.innerHTML='';
+    upgrades.forEach(u=>{
+      const lvl=data.upgrades[u.key]||0; const maxed=lvl>=u.max;
+      const cost = Math.floor(u.cost * Math.pow(1.75,lvl));
+      const can = canAfford(cost)&&!maxed;
+      const card=document.createElement('div'); card.className='panel';
+      card.innerHTML=`<div class="phead"><b>${u.name}</b><small class="muted">${u.type}</small></div>
+      <p class="hint">${u.desc}</p>
+      <div class="row"><span class="chip">Lv ${lvl}/${u.max}</span><span class="chip">Cost ${fmt(cost)}</span></div>
+      <div class="footer"><button class="btn ${can?'good':''}" ${!can?'disabled':''}>Buy</button></div>`;
+      card.querySelector('button').addEventListener('click',()=>{
+        if(data.gold<cost||maxed) return; data.gold-=cost; data.upgrades[u.key]=(data.upgrades[u.key]||0)+1; applyUpgradeEffects(); renderAll();
+      });
+      g.appendChild(card);
+    });
+  }
+
+  function renderAchievements(){
+    const g=el('#achGrid'); g.innerHTML='';
+    achievements.forEach(a=>{
+      const owned = !!data.ach[a.key];
+      const card=document.createElement('div'); card.className='panel';
+      card.innerHTML=`<div class="phead"><b>${a.name}</b><small class="muted">Reward ${a.reward}g</small></div>
+      <div class="row"><span class="chip">${owned?'Claimed':'Locked/Auto'}</span></div>`;
+      g.appendChild(card);
+    });
+  }
+
+  function renderCombatUI(){
+    const s=el('#combatStats'); s.innerHTML='';
+    const p=data.combat.player; const e=getEnemy(data.combat.enemyKey);
+    const rows=[["Player HP", `${fmt(p.hp)}/${fmt(p.hpMax)}`], ["ATK", p.atk], ["DEF", p.def], ["SPD", p.spd.toFixed(2)], ["Area", data.combat.area], ["Enemy", e?e.key:'—']];
+    rows.forEach(([k,v])=>{ const d=document.createElement('div'); d.className='item'; d.innerHTML=`<span>${k}</span><b>${v}</b>`; s.appendChild(d); });
+
+    const l=el('#enemyList'); l.innerHTML='';
+    enemies[data.combat.area].forEach(x=>{
+      const d=document.createElement('div'); d.className='item'; d.innerHTML=`<div><b>${x.key}</b><div class="hint">${x.hp} HP · ${x.atk}/${x.def}/${x.spd}</div></div><button class="btn">Target</button>`;
+      d.querySelector('button').addEventListener('click',()=>{ data.combat.enemyKey=x.key; el('#combatInfo').textContent='Target: '+x.key; });
+      l.appendChild(d);
+    });
+  }
+
+  function renderSettingsFooter(){
+    el('#version').textContent='v'+VERSION;
+    el('#saveInfo').textContent='Loaded';
+  }
+
+  function renderAll(){
+    renderStats(); renderSkills(); renderTaskPanel(); renderOverview(); renderInventory(); renderCrafting(); renderUpgrades(); renderAchievements(); renderCombatUI();
+  }
+
+  // --- SKILL PROGRESSION ---------------------------------------------------
+  function addSkillXP(skill, amount){
+    const sk=data.skills[skill];
+    const gain = Math.floor(amount * mul.globalXP());
+    sk.xp += gain; data.xp += gain;
+    const lvlNow=levelFromXP(sk.xp);
+    if(lvlNow>sk.lvl){ sk.lvl=lvlNow; showToast(`${skill} → Lv.${lvlNow}!`); }
+  }
+
+  function performNode(skill, node){
+    // costs
+    if(node.consume && !Object.entries(node.consume).every(([k,v])=> (data.inventory[k]||0)>=v )) return false;
+    if(node.consume) for(const [k,v] of Object.entries(node.consume)) data.inventory[k]-=v;
+    // yields
+    for(const [k,[a,b]] of Object.entries(node.yield||{})) addInventory(k, randInt(a,b));
+    if(node.yield && node.yield.gold){ data.gold += randInt(...node.yield.gold); }
+    if(node.yield && node.yield.xp){ addSkillXP('Combat', randInt(...node.yield.xp)); }
+    addSkillXP(skill, node.xp);
+    // bonus: crafting items value buff
+    if(skill==='Smithing' || skill==='Cooking'){
+      const extra = (mul.craftValue()-1);
+      if(node.yield && node.yield.gold && extra>0){ data.gold = Math.floor(data.gold + randInt(...node.yield.gold)*extra); }
+    }
+    return true;
+  }
+
+  // --- CRAFTING QUEUE TICK -------------------------------------------------
+  function craftingTick(dt){
+    if(data.craftingQueue.length===0) return;
+    const item = data.craftingQueue[0];
+    item.timeLeft -= dt;
+    if(item.timeLeft<=0){
+      // finish
+      const origin=item.origin;
+      for(const [k,[a,b]] of Object.entries(origin.yield)){
+        if(k==='gold') data.gold+=randInt(a,b); else addInventory(k, randInt(a,b));
+      }
+      addSkillXP(origin.key==='bar'||origin.key==='plate' ? 'Smithing' : 'Cooking', origin.xp);
+      data.craftingQueue.shift();
+      showToast(`${origin.name} crafted`);
+    }
+  }
+
+  // --- COMBAT LOOP + CANVAS -----------------------------------------------
+  const cvs = el('#arena'); const ctx=cvs.getContext('2d');
+  let lastAtkP=0, lastAtkE=0; let enemyHP=30;
+
+  function getEnemy(key){
+    return enemies[data.combat.area].find(e=>e.key===key)||enemies[data.combat.area][0];
+  }
+  function startStopFight(){ data.combat.running=!data.combat.running; if(data.combat.running){ const e=getEnemy(data.combat.enemyKey); enemyHP=e.hp; el('#combatInfo').textContent='Fighting '+e.key; } else el('#combatInfo').textContent='Idle'; }
+
+  function combatTick(dt){
+    if(!data.combat.running) return;
+    const p=data.combat.player; const e=getEnemy(data.combat.enemyKey);
+    const pRate = 1000/ (p.spd*1.0);
+    const eRate = 1000/ (e.spd*1.0);
+    lastAtkP += dt; lastAtkE += dt;
+
+    if(lastAtkP>=pRate){ lastAtkP-=pRate; const dmg = Math.max(1, p.atk - e.def + randInt(0,2)); enemyHP -= dmg; }
+    if(lastAtkE>=eRate){ lastAtkE-=eRate; const dmg = Math.max(1, e.atk - p.def + randInt(0,2)); p.hp = clamp(p.hp - dmg, 0, p.hpMax); }
+
+    if(enemyHP<=0){
+      // win: grant rewards
+      stats.fightsWon++;
+      const g=randInt(...e.gold); data.gold+=g;
+      for(const [k,[a,b]] of Object.entries(e.drops||{})) addInventory(k, randInt(a,b));
+      addSkillXP('Combat', 12);
+      const e2=getEnemy(data.combat.enemyKey); enemyHP=e2.hp;
+      stats.slimeKills += e.key==='Slime'?1:0;
+    }
+    if(p.hp<=0){ p.hp=p.hpMax; data.combat.running=false; el('#combatInfo').textContent='Defeated!'; }
+  }
+
+  function drawArena(){
+    const p=data.combat.player; const e=getEnemy(data.combat.enemyKey);
+    ctx.clearRect(0,0,cvs.width,cvs.height);
+    // background grid
+    ctx.globalAlpha=0.15; ctx.fillStyle='#6b7280';
+    for(let x=0;x<cvs.width;x+=16) ctx.fillRect(x,0,1,cvs.height);
+    for(let y=0;y<cvs.height;y+=16) ctx.fillRect(0,y,cvs.width,1);
+    ctx.globalAlpha=1;
+    // player rect
+    ctx.fillStyle='#22c55e'; ctx.fillRect(80,200,40,40);
+    // enemy rect
+    ctx.fillStyle='#ef4444'; ctx.fillRect(360,200,40,40);
+    // hp bars
+    bar(60,40,p.hp/p.hpMax,'#22c55e','Player');
+    bar(280,40,enemyHP/Math.max(1,e.hp),'#ef4444',e.key);
+
+    function bar(x,y,ratio,color,label){
+      ctx.strokeStyle='#334155'; ctx.strokeRect(x,y,140,12); ctx.fillStyle=color; ctx.fillRect(x+1,y+1, Math.floor((140-2)*clamp(ratio,0,1)), 10); ctx.fillStyle='#94a3b8'; ctx.font='12px system-ui'; ctx.fillText(label, x, y-4);
+    }
+  }
+
+  // --- ACHIEVEMENTS CHECK --------------------------------------------------
+  function checkAchievements(){
+    achievements.forEach(a=>{
+      if(!data.ach[a.key] && a.cond(data)){
+        data.ach[a.key]=true; data.gold+=a.reward; showToast(`Achievement: ${a.name} (+${a.reward}g)`);
+      }
+    });
+  }
+
+  // --- TEST HARNESS --------------------------------------------------------
+  let suppressToast=false;
+  const originalShowToast = (msg)=>{
+    const t=el('#toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'), 1500);
+  };
+  function showToast(msg){ if(suppressToast) return; originalShowToast(msg); }
+
+  function deepAssign(target, source){
+    // remove existing keys (preserve reference), then apply source keys
+    Object.keys(target).forEach(k=>{ delete target[k]; });
+    Object.keys(source).forEach(k=>{ target[k]=source[k]; });
+  }
+
+  function runTests(){
+    suppressToast=true;
+    const results=[]; const logs=[];
+    function assert(name, cond){ results.push({name, pass:!!cond}); if(!cond) console.error('FAIL:', name); else console.log('OK:', name); }
+
+    // snapshot
+    const dataSnap = JSON.parse(JSON.stringify(data));
+    const statsSnap = JSON.parse(JSON.stringify(stats));
+
+    try{
+      // 1) getStat helper
+      assert('getStat returns 0 for unknown', getStat('__nope__')===0);
+      stats.__tmp = 3; assert('getStat returns existing value', getStat('__tmp')===3); delete stats.__tmp;
+
+      // 2) achievements: slime50 unlock
+      data.ach = {}; stats.slimeKills = 49; const g0=data.gold; checkAchievements();
+      assert('slime50 not unlocked at 49', !data.ach.slime50);
+      stats.slimeKills = 50; const g1=data.gold; checkAchievements();
+      assert('slime50 unlocked at 50', !!data.ach.slime50);
+      assert('slime50 gives 80 gold', data.gold === g1 + 80);
+
+      // 3) multipliers baseline is 1 without upgrades
+      data.upgrades = {}; assert('globalGain baseline 1', Math.abs(mul.globalGain()-1)<1e-9);
+      assert('globalXP baseline 1', Math.abs(mul.globalXP()-1)<1e-9);
+      assert('globalSpeed baseline 1', Math.abs(mul.globalSpeed()-1)<1e-9);
+
+      // 4) performNode respects costs
+      data.inventory={wood:0, ore:0, fish:0, bar:0, meal:0, gem:0, skin:0};
+      const smelt=nodes.Smithing[0];
+      assert('smelt fails with no ore', performNode('Smithing', smelt)===false);
+      data.inventory.ore=3; const bBefore=data.inventory.bar||0; assert('smelt succeeds with ore', performNode('Smithing', smelt)===true);
+      assert('bar increased by 1', data.inventory.bar === bBefore + 1);
+
+    } finally {
+      // restore
+      deepAssign(data, dataSnap); deepAssign(stats, statsSnap);
+      suppressToast=false;
+    }
+
+    const pass = results.filter(r=>r.pass).length; const total=results.length;
+    const text = `${pass}/${total} tests passed.`;
+    console.log('[Idle Foundry Tests]', text, results);
+    const trg = el('#testResults'); if(trg) trg.textContent = 'Tests: ' + text;
+    return {pass, total, results};
+  }
+
+  // --- TICK ----------------------------------------------------------------
+  let accum=0; let lastTime=performance.now();
+  function loop(now){
+    const dt = now-lastTime; lastTime=now; accum+=dt; while(accum>=TICK_MS){ tick(TICK_MS); accum-=TICK_MS; }
+    drawArena();
+    requestAnimationFrame(loop);
+  }
+
+  function tick(dt){
+    stats.totalTicks++;
+    // active skill
+    const skill=data.activeSkill; const taskKey=data.skills[skill].task; const node = nodes[skill].find(n=>n.key===taskKey);
+    if(node){
+      data.skills[skill]._prog=(data.skills[skill]._prog||0)+dt*(mul.globalSpeed()*mul.skillSpeed(skill));
+      const need=node.time;
+      if(data.skills[skill]._prog>=need){ data.skills[skill]._prog-=need; performNode(skill,node); }
+      const eta = Math.ceil((need - (data.skills[skill]._prog||0)) / 1000);
+      el('#taskETA').textContent = `${skill}: ${node.name} · ${eta}s`;
+    } else { el('#taskETA').textContent='—'; }
+
+    craftingTick(dt);
+    combatTick(dt);
+    checkAchievements();
+
+    if(data.meta.debug){ el('#tickInfo').textContent=`t=${stats.totalTicks} q=${data.craftingQueue.length}`; }
+
+    // autosave every 30s approx
+    if(data.meta.autosave && stats.totalTicks % Math.floor(30000/TICK_MS)===0) save();
+    if(stats.totalTicks % Math.floor(2000/TICK_MS)===0) { renderStats(); renderOverview(); renderInventory(); }
+  }
+
+  // --- UI EVENTS -----------------------------------------------------------
+  el('#btnFight').addEventListener('click',startStopFight);
+  el('#btnSaveNow').addEventListener('click',save);
+  el('#btnExport').addEventListener('click',exportSave);
+  el('#btnImport').addEventListener('click',importSave);
+  el('#btnHardReset').addEventListener('click',hardReset);
+  el('#btnClaimOffline').addEventListener('click',()=>{ const ms=applyOfflineProgress(); renderAll(); showToast(`Applied ${Math.floor(ms/60000)} min of offline.`); });
+  el('#btnRunTests').addEventListener('click',()=>runTests());
+
+  el('#optAutosave').addEventListener('change',e=>{ data.meta.autosave=e.target.checked; });
+  el('#optDebug').addEventListener('change',e=>{ data.meta.debug=e.target.checked; });
+  el('#optOfflineHours').addEventListener('change',e=>{ data.meta.offlineCapHrs=clamp(parseInt(e.target.value||'8'),0,24); e.target.value=data.meta.offlineCapHrs; });
+
+  // --- INIT ----------------------------------------------------------------
+  function init(){
+    load(); renderTabs(); renderAll(); renderSettingsFooter();
+    // run built-in tests once on load; results in console and Settings panel
+    runTests();
+    const applied = applyOfflineProgress(); if(applied>0) showToast(`Welcome back! (+${Math.floor(applied/60000)}m)`);
+    applyUpgradeEffects();
+    requestAnimationFrame(loop);
+  }
+
+  init();
+})();
+</script>
+</body>
+</html>
