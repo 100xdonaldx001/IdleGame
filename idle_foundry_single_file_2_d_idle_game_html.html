@@ -166,7 +166,7 @@
       Cooking: {lvl:1, xp:0, task:null},
       Combat: {lvl:1, xp:0, task:null}
     },
-    inventory: {wood:0, ore:0, fish:0, bar:0, meal:0, gem:0, skin:0},
+    inventory: {twig:0, oak:0, yew:0, pebble:0, iron:0, mythril:0, fish:0, bar:0, meal:0, gem:0, skin:0},
     upgrades: {},
     craftingQueue: [],
     activeSkill: 'Woodcutting',
@@ -181,14 +181,14 @@
   // Base nodes (activities) per skill
   const nodes = {
     Woodcutting:[
-      {key:'twig', name:'Twigs', time:2000, yield:{wood:[1,2]}, xp:4, req:1},
-      {key:'oak', name:'Oak', time:3500, yield:{wood:[3,5]}, xp:8, req:5},
-      {key:'yew', name:'Yew', time:5000, yield:{wood:[6,8]}, xp:14, req:12},
+      {key:'twig', name:'Twigs', time:2000, yield:{twig:[1,2]}, xp:4, req:1},
+      {key:'oak', name:'Oak', time:3500, yield:{oak:[3,5]}, xp:8, req:5},
+      {key:'yew', name:'Yew', time:5000, yield:{yew:[6,8]}, xp:14, req:12},
     ],
     Mining:[
-      {key:'pebble', name:'Pebbles', time:2500, yield:{ore:[1,2]}, xp:5, req:1},
-      {key:'iron', name:'Iron Vein', time:4000, yield:{ore:[3,5]}, xp:10, req:6},
-      {key:'mythril', name:'Mythril Vein', time:6000, yield:{ore:[6,8], gem:[0,1]}, xp:16, req:14},
+      {key:'pebble', name:'Pebbles', time:2500, yield:{pebble:[1,2]}, xp:5, req:1},
+      {key:'iron', name:'Iron Vein', time:4000, yield:{iron:[3,5]}, xp:10, req:6},
+      {key:'mythril', name:'Mythril Vein', time:6000, yield:{mythril:[6,8], gem:[0,1]}, xp:16, req:14},
     ],
     Fishing:[
       {key:'pond', name:'Pond', time:2500, yield:{fish:[1,2]}, xp:5, req:1},
@@ -196,11 +196,11 @@
       {key:'sea', name:'Open Sea', time:5200, yield:{fish:[5,7], skin:[0,1]}, xp:15, req:13},
     ],
     Smithing:[
-      {key:'bar', name:'Smelt Bar', time:4000, consume:{ore:3}, yield:{bar:[1,1]}, xp:10, req:3},
+      {key:'bar', name:'Smelt Bar', time:4000, consume:{iron:3}, yield:{bar:[1,1]}, xp:10, req:3},
       {key:'plate', name:'Forge Plate', time:6000, consume:{bar:3}, yield:{gold:[7,12]}, xp:14, req:10},
     ],
     Cooking:[
-      {key:'meal', name:'Cook Meal', time:3500, consume:{fish:2, wood:1}, yield:{meal:[1,2]}, xp:10, req:3},
+      {key:'meal', name:'Cook Meal', time:3500, consume:{fish:2, twig:1}, yield:{meal:[1,2]}, xp:10, req:3},
       {key:'feast', name:'Hearty Feast', time:5500, consume:{meal:2, bar:1}, yield:{gold:[10,16]} , xp:14, req:11},
     ],
     Combat:[
@@ -323,7 +323,7 @@
   }
   function load(){
     const raw = localStorage.getItem(SAVE_KEY);
-    if(!raw){ data.gold=25; addInventory('wood',3); addInventory('ore',2); }
+    if(!raw){ data.gold=25; addInventory('twig',3); addInventory('iron',2); }
     else{
       try{
         const obj = JSON.parse(raw);
@@ -689,10 +689,10 @@
       assert('globalSpeed baseline 1', Math.abs(mul.globalSpeed()-1)<1e-9);
 
       // 4) performNode respects costs
-      data.inventory={wood:0, ore:0, fish:0, bar:0, meal:0, gem:0, skin:0};
+      data.inventory={twig:0, oak:0, yew:0, pebble:0, iron:0, mythril:0, fish:0, bar:0, meal:0, gem:0, skin:0};
       const smelt=nodes.Smithing[0];
-      assert('smelt fails with no ore', performNode('Smithing', smelt)===false);
-      data.inventory.ore=3; const bBefore=data.inventory.bar||0; assert('smelt succeeds with ore', performNode('Smithing', smelt)===true);
+      assert('smelt fails with no iron', performNode('Smithing', smelt)===false);
+      data.inventory.iron=3; const bBefore=data.inventory.bar||0; assert('smelt succeeds with iron', performNode('Smithing', smelt)===true);
       assert('bar increased by 1', data.inventory.bar === bBefore + 1);
 
     } finally {
