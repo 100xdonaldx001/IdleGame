@@ -92,7 +92,16 @@ export function renderInventory() {
 
 export function renderCrafting() {
   const g = el('#craftGrid'); g.innerHTML = '';
-  const list = [...nodes.Smithing, ...nodes.Cooking];
+  const q = (el('#craftSearch')?.value || '').trim().toLowerCase();
+  const list = [...nodes.Smithing, ...nodes.Cooking].filter(n => {
+    if (!q) return true;
+    const names = [
+      ...Object.keys(n.consume || {}),
+      ...Object.keys(n.yield),
+      n.name
+    ].map(k => (itemMap[k] || k).toLowerCase());
+    return names.some(x => x.includes(q));
+  });
   list.forEach(n => {
     const card = document.createElement('div'); card.className = 'panel';
     const canAff = n.consume ? Object.entries(n.consume).every(([k, v]) => (data.inventory[k] || 0) >= v) : true;
