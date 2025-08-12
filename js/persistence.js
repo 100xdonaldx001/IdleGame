@@ -24,11 +24,13 @@ export function load() {
       Object.assign(data, obj.data || {});
       Object.assign(stats, obj.stats || {});
       applyUpgradeEffects();
+      if (data.meta.virtualLevels == null) data.meta.virtualLevels = false;
     } catch (e) { console.warn('Load failed', e); }
   }
   el('#optAutosave').checked = !!data.meta.autosave;
   el('#optDebug').checked = !!data.meta.debug;
   el('#tickInfo').hidden = !data.meta.debug;
+  el('#optVirtualLevels').checked = !!data.meta.virtualLevels;
   el('#optOfflineHours').value = data.meta.offlineCapHrs;
 }
 
