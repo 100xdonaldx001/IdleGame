@@ -7,7 +7,7 @@ import {craftingTick} from './crafting.js';
 import {combatTick, drawArena} from './combat.js';
 import {checkAchievements} from './achievementCheck.js';
 import {save} from './persistence.js';
-import {renderStats, renderOverview, renderInventory} from './render.js';
+import {renderStats, renderOverview, renderInventory, renderSkills} from './render.js';
 import {el} from './utils.js';
 
 export function tick(dt) {
@@ -27,7 +27,12 @@ export function tick(dt) {
 
   if (data.meta.debug) { el('#tickInfo').textContent = `t=${stats.totalTicks} q=${data.craftingQueue.length}`; }
   if (data.meta.autosave && stats.totalTicks % Math.floor(30000 / TICK_MS) === 0) save();
-  if (stats.totalTicks % Math.floor(2000 / TICK_MS) === 0) { renderStats(); renderOverview(); renderInventory(); }
+  if (stats.totalTicks % Math.floor(2000 / TICK_MS) === 0) {
+    renderStats();
+    renderOverview();
+    renderInventory();
+    renderSkills();
+  }
 }
 
 let accum = 0; let lastTime = performance.now();
