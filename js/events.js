@@ -2,7 +2,7 @@ import {data} from './data.js';
 import {startStopFight} from './combat.js';
 import {save, exportSave, importSave, hardReset} from './persistence.js';
 import {applyOfflineProgress} from './offline.js';
-import {renderAll, renderCrafting} from './render.js';
+import {renderAll, renderStats, renderCrafting} from './render.js';
 import {runTests} from './tests.js';
 import {el, clamp} from './utils.js';
 import {showToast} from './toast.js';
@@ -21,6 +21,7 @@ export function initEvents() {
     data.meta.debug = dbg;
     el('#tickInfo').hidden = !dbg;
     if (!dbg) el('#tickInfo').textContent = '';
+    renderStats();
   });
   el('#optOfflineHours').addEventListener('change', e => { data.meta.offlineCapHrs = clamp(parseInt(e.target.value || '8'), 0, 24); e.target.value = data.meta.offlineCapHrs; });
   el('#craftSearch').addEventListener('input', () => renderCrafting());
