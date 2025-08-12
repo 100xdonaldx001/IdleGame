@@ -28,6 +28,7 @@ export function load() {
   }
   el('#optAutosave').checked = !!data.meta.autosave;
   el('#optDebug').checked = !!data.meta.debug;
+  el('#tickInfo').hidden = !data.meta.debug;
   el('#optOfflineHours').value = data.meta.offlineCapHrs;
 }
 

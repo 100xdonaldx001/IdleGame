@@ -16,6 +16,11 @@ export function initEvents() {
   el('#btnClaimOffline').addEventListener('click', () => { const ms = applyOfflineProgress(); renderAll(); showToast(`Applied ${Math.floor(ms / 60000)} min of offline.`); });
   el('#btnRunTests').addEventListener('click', () => runTests());
   el('#optAutosave').addEventListener('change', e => { data.meta.autosave = e.target.checked; });
-  el('#optDebug').addEventListener('change', e => { data.meta.debug = e.target.checked; });
+  el('#optDebug').addEventListener('change', e => {
+    const dbg = e.target.checked;
+    data.meta.debug = dbg;
+    el('#tickInfo').hidden = !dbg;
+    if (!dbg) el('#tickInfo').textContent = '';
+  });
   el('#optOfflineHours').addEventListener('change', e => { data.meta.offlineCapHrs = clamp(parseInt(e.target.value || '8'), 0, 24); e.target.value = data.meta.offlineCapHrs; });
 }
