@@ -47,8 +47,16 @@ export function renderSkills() {
 }
 
 export function nodeButton(skill, node) {
-  const b = document.createElement('button'); b.className = 'btn'; b.textContent = node.name; b.title = `${node.time / 1000}s · +${Object.entries(node.yield || {}).map(([k, [a, b]]) => `${a}-${b} ${k}`).join(', ')}${node.consume ? ' · Cost: ' + Object.entries(node.consume).map(([k, v]) => `${v} ${k}`).join(', ') : ''} · +${node.xp} XP`;
-  b.addEventListener('click', () => { data.skills[skill].task = node.key; renderTaskPanel(); });
+  const b = document.createElement('button');
+  b.className = 'btn';
+  b.textContent = node.name;
+  b.title = `${node.time / 1000}s · +${Object.entries(node.yield || {}).map(([k, [a, b]]) => `${a}-${b} ${k}`).join(', ')}${node.consume ? ' · Cost: ' + Object.entries(node.consume).map(([k, v]) => `${v} ${k}`).join(', ') : ''} · +${node.xp} XP`;
+  b.addEventListener('click', () => {
+    const cur = data.skills[skill].task;
+    data.skills[skill].task = cur === node.key ? null : node.key;
+    if (!data.skills[skill].task) el('#taskETA').textContent = '—';
+    renderTaskPanel();
+  });
   return b;
 }
 
