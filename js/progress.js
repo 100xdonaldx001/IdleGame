@@ -12,6 +12,7 @@ export function addSkillXP(skill, amount) {
     sk.lvl = Math.min(lvlNow, 99);
     showToast(`${skill} → Lv.${sk.lvl}!`);
     if (skill === 'Endurance') applyUpgradeEffects();
+  }
 }
 
 export const helpers = {addInventory, addSkillXP, randInt, mul};
