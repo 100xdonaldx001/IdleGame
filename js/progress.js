@@ -1,5 +1,5 @@
 import {data} from './data.js';
-import {mul, addInventory} from './helpers.js';
+import {mul, addInventory, applyUpgradeEffects} from './helpers.js';
 import {randInt, levelFromXP} from './utils.js';
 import {showToast} from './toast.js';
 
@@ -11,6 +11,7 @@ export function addSkillXP(skill, amount) {
   if (lvlNow > sk.lvl && sk.lvl < 99) {
     sk.lvl = Math.min(lvlNow, 99);
     showToast(`${skill} → Lv.${sk.lvl}!`);
+    if (skill === 'Endurance') applyUpgradeEffects();
   }
 }
 

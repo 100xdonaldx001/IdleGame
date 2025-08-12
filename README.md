@@ -2,6 +2,11 @@
 
 IdleGame hosts **Idle Foundry**, a compact Melvor-inspired 2D idle game. Gather resources, level skills, craft gear and battle simple enemies while the game progresses on its own.
 
+## Vision
+IdleGame is an ever-expanding idle universe where each activity is its own fully-fledged skill, yet every skill is interconnected in the long run. Race to upgrade your vehicles for faster travel between regions, master medieval combat to secure rare materials, mine resources to fuel industry, and manage supermarkets that serve the growing population. As your influence expands, establish banks to control the flow of currency and finance further growth.
+
+Every branch begins as an independent idle game, but as you progress, their outputs weave together into a unified economy — one where every skill, every system, and every choice feeds into your ultimate empire.
+
 ## Features
 - **Six core skills**: Woodcutting, Mining, Fishing, Smithing, Cooking and Combat.
 - **Inventory & crafting**: Collect wood, ore, fish and more to craft bars, meals and other goods.
