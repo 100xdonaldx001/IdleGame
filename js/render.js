@@ -7,7 +7,7 @@ import enemies from './enemies.js';
 import {mul, canAfford, applyUpgradeEffects} from './helpers.js';
 import {queueCraft} from './crafting.js';
 import {getEnemy} from './combat.js';
-import {el, fmt} from './utils.js';
+import {el, fmt, xpForLevel} from './utils.js';
 
 export function tabButton(id, label) {
   const b = document.createElement('button'); b.className = 'tab'; b.role = 'tab'; b.textContent = label; b.dataset.tab = id; b.addEventListener('click', () => activateTab(id, b)); return b;
@@ -40,7 +40,10 @@ export function renderSkills() {
     const sk = data.skills[name];
     const row = document.createElement('div'); row.className = 'item';
     const active = data.activeSkill === name;
-    row.innerHTML = `<div><b>${name}</b><div class="bar"><span style="width:${(sk.xp % 100) / 1}%"></span></div><small class="muted">Lv ${sk.lvl} · ${fmt(sk.xp)} XP</small></div>
+    const cur = xpForLevel(sk.lvl);
+    const next = xpForLevel(sk.lvl + 1);
+    const pct = ((sk.xp - cur) / (next - cur)) * 100;
+    row.innerHTML = `<div><b>${name}</b><div class="bar"><span style="width:${pct}%"></span></div><small class="muted">Lv ${sk.lvl} · ${fmt(sk.xp)} XP</small></div>
     <div class="row"><button class="btn ${active ? 'good' : ''}">${active ? 'Training' : 'Train'}</button></div>`;
     row.querySelector('button').addEventListener('click', () => { data.activeSkill = name; renderSkills(); renderTaskPanel(); });
     s.appendChild(row);
@@ -48,8 +51,16 @@ export function renderSkills() {
 }
 
 export function nodeButton(skill, node) {
-  const b = document.createElement('button'); b.className = 'btn'; b.textContent = node.name; b.title = `${node.time / 1000}s · +${Object.entries(node.yield || {}).map(([k, [a, b]]) => `${a}-${b} ${k}`).join(', ')}${node.consume ? ' · Cost: ' + Object.entries(node.consume).map(([k, v]) => `${v} ${k}`).join(', ') : ''} · +${node.xp} XP`;
-  b.addEventListener('click', () => { data.skills[skill].task = node.key; renderTaskPanel(); });
+  const b = document.createElement('button');
+  b.className = 'btn';
+  b.textContent = node.name;
+  b.title = `${node.time / 1000}s · +${Object.entries(node.yield || {}).map(([k, [a, b]]) => `${a}-${b} ${k}`).join(', ')}${node.consume ? ' · Cost: ' + Object.entries(node.consume).map(([k, v]) => `${v} ${k}`).join(', ') : ''} · +${node.xp} XP`;
+  b.addEventListener('click', () => {
+    const cur = data.skills[skill].task;
+    data.skills[skill].task = cur === node.key ? null : node.key;
+    if (!data.skills[skill].task) el('#taskETA').textContent = '—';
+    renderTaskPanel();
+  });
   return b;
 }
 
@@ -70,7 +81,9 @@ export function renderOverview() {
   const g = el('#overviewGrid'); g.innerHTML = '';
   const cards = [
     ['Gold', `Earned from many actions.`, `<div class="kv"><b>${fmt(data.gold)}</b><small class="muted">coins</small></div>`],
-    ['Inventory', `Your current stock.`, Object.entries(data.inventory).map(([k, v]) => `<span class="chip">${k}: ${fmt(v)}</span>`).join(' ')],
+    ['Inventory', `Your current stock.`, Object.entries(data.inventory)
+      .filter(([_, v]) => v > 0)
+      .map(([k, v]) => `<span class="chip">${k}: ${fmt(v)}</span>`).join(' ')],
     ['Training', `Current skill & task.`, `<div>${data.activeSkill} → <b>${(data.skills[data.activeSkill].task || 'Choose a node')}</b></div>`],
     ['Global Multipliers', `From upgrades.`, `<div class="list">
       <div class="item"><span>Gain</span><b>x${mul.globalGain().toFixed(2)}</b></div>
@@ -84,6 +97,7 @@ export function renderOverview() {
 export function renderInventory() {
   const g = el('#invGrid'); g.innerHTML = '';
   for (const [k, v] of Object.entries(data.inventory)) {
+    if (v <= 0) continue;
     const card = document.createElement('div'); card.className = 'panel';
     const name = itemMap[k] || k;
     card.innerHTML = `<div class="phead"><b>${name}</b><small class="muted">Resource</small></div><div class="kv"><b>${fmt(v)}</b></div>`;
@@ -93,7 +107,16 @@ export function renderInventory() {
 
 export function renderCrafting() {
   const g = el('#craftGrid'); g.innerHTML = '';
-  const list = [...nodes.Smithing, ...nodes.Cooking];
+  const q = (el('#craftSearch')?.value || '').trim().toLowerCase();
+  const list = [...nodes.Smithing, ...nodes.Cooking].filter(n => {
+    if (!q) return true;
+    const names = [
+      ...Object.keys(n.consume || {}),
+      ...Object.keys(n.yield),
+      n.name
+    ].map(k => (itemMap[k] || k).toLowerCase());
+    return names.some(x => x.includes(q));
+  });
   list.forEach(n => {
     const card = document.createElement('div'); card.className = 'panel';
     const canAff = n.consume ? Object.entries(n.consume).every(([k, v]) => (data.inventory[k] || 0) >= v) : true;
@@ -110,8 +133,22 @@ export function renderCrafting() {
 }
 
 export function renderUpgrades() {
+  const sel = el('#upgFilter');
+  if (sel && !sel.dataset.init) {
+    sel.innerHTML = '<option value="all">All</option>';
+    const types = Array.from(new Set(upgrades.map(u => u.type)));
+    types.forEach(t => {
+      const opt = document.createElement('option');
+      opt.value = t;
+      opt.textContent = t.charAt(0).toUpperCase() + t.slice(1);
+      sel.appendChild(opt);
+    });
+    sel.addEventListener('change', renderUpgrades);
+    sel.dataset.init = '1';
+  }
+  const filter = sel ? sel.value : 'all';
   const g = el('#upgGrid'); g.innerHTML = '';
-  upgrades.forEach(u => {
+  upgrades.filter(u => filter === 'all' || u.type === filter).forEach(u => {
     const lvl = data.upgrades[u.key] || 0; const maxed = lvl >= u.max;
     const cost = Math.floor(u.cost * Math.pow(1.75, lvl));
     const can = canAfford(cost) && !maxed;

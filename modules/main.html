@@ -14,11 +14,20 @@
 
     <section class="panel" id="tab-crafting" role="tabpanel" hidden>
       <div class="phead"><b>Crafting</b><small class="muted">Turn resources into useful goods</small></div>
+      <div class="row" style="margin-bottom:8px">
+        <input type="search" id="craftSearch" placeholder="Search by item" style="flex:1">
+      </div>
       <div class="grid" id="craftGrid"></div>
     </section>
 
     <section class="panel" id="tab-upgrades" role="tabpanel" hidden>
       <div class="phead"><b>Upgrades</b><small class="muted">Permanent boosts</small></div>
+      <div class="row">
+        <span class="muted">Filter</span>
+        <select id="upgFilter">
+          <option value="all">All</option>
+        </select>
+      </div>
       <div class="grid" id="upgGrid"></div>
     </section>
 

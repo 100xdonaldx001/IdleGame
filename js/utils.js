@@ -8,3 +8,13 @@ export function levelFromXP(xp) {
   while (xp >= need) { xp -= need; lvl++; need = Math.floor(need * 1.25 + 10); if (lvl >= 99) break; }
   return lvl;
 }
+
+export function xpForLevel(lvl) {
+  let xp = 0, need = 20;
+  for (let i = 1; i < lvl; i++) {
+    xp += need;
+    need = Math.floor(need * 1.25 + 10);
+    if (i >= 99) break;
+  }
+  return xp;
+}
