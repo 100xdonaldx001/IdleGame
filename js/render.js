@@ -7,7 +7,7 @@ import enemies from './enemies.js';
 import {mul, canAfford, applyUpgradeEffects} from './helpers.js';
 import {queueCraft} from './crafting.js';
 import {getEnemy} from './combat.js';
-import {el, fmt, xpForLevel} from './utils.js';
+import {el, fmt, xpForLevel, levelFromXP} from './utils.js';
 
 export function tabButton(id, label) {
   const b = document.createElement('button'); b.className = 'tab'; b.role = 'tab'; b.textContent = label; b.dataset.tab = id; b.addEventListener('click', () => activateTab(id, b)); return b;
@@ -40,10 +40,12 @@ export function renderSkills() {
     const sk = data.skills[name];
     const row = document.createElement('div'); row.className = 'item';
     const active = data.activeSkill === name;
-    const cur = xpForLevel(sk.lvl);
-    const next = xpForLevel(sk.lvl + 1);
-    const pct = ((sk.xp - cur) / (next - cur)) * 100;
-    row.innerHTML = `<div><b>${name}</b><div class="bar"><span style="width:${pct}%"></span></div><small class="muted">Lv ${sk.lvl} · ${fmt(sk.xp)} XP</small></div>
+    const actual = levelFromXP(sk.xp);
+    const cur = xpForLevel(actual);
+    const next = xpForLevel(actual + 1);
+    const pct = sk.lvl >= 99 && !data.meta.virtualLevels ? 100 : ((sk.xp - cur) / (next - cur)) * 100;
+    const lvlText = data.meta.virtualLevels ? actual : sk.lvl;
+    row.innerHTML = `<div><b>${name}</b><div class="bar"><span style="width:${pct}%"></span></div><small class="muted">Lv ${lvlText} · ${fmt(sk.xp)} XP</small></div>`,
     <div class="row"><button class="btn ${active ? 'good' : ''}">${active ? 'Training' : 'Train'}</button></div>`;
     row.querySelector('button').addEventListener('click', () => { data.activeSkill = name; renderSkills(); renderTaskPanel(); });
     s.appendChild(row);

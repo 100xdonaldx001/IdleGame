@@ -8,7 +8,10 @@ export function addSkillXP(skill, amount) {
   const gain = Math.floor(amount * mul.globalXP());
   sk.xp += gain; data.xp += gain;
   const lvlNow = levelFromXP(sk.xp);
-  if (lvlNow > sk.lvl) { sk.lvl = lvlNow; showToast(`${skill} → Lv.${lvlNow}!`); }
+  if (lvlNow > sk.lvl && sk.lvl < 99) {
+    sk.lvl = Math.min(lvlNow, 99);
+    showToast(`${skill} → Lv.${sk.lvl}!`);
+  }
 }
 
 export const helpers = {addInventory, addSkillXP, randInt, mul};
