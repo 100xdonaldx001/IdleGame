@@ -45,8 +45,7 @@ export function renderSkills() {
     const next = xpForLevel(actual + 1);
     const pct = sk.lvl >= 99 && !data.meta.virtualLevels ? 100 : ((sk.xp - cur) / (next - cur)) * 100;
     const lvlText = data.meta.virtualLevels ? actual : sk.lvl;
-    row.innerHTML = `<div><b>${name}</b><div class="bar"><span style="width:${pct}%"></span></div><small class="muted">Lv ${lvlText} · ${fmt(sk.xp)} XP</small></div>`,
-    <div class="row"><button class="btn ${active ? 'good' : ''}">${active ? 'Training' : 'Train'}</button></div>`;
+    row.innerHTML = `<div><b>${name}</b><div class="bar"><span style="width:${pct}%"></span></div><small class="muted">Lv ${lvlText} · ${fmt(sk.xp)} XP</small></div><div class="row"><button class="btn ${active ? 'good' : ''}">${active ? 'Training' : 'Train'}</button></div>`;
     row.querySelector('button').addEventListener('click', () => { data.activeSkill = name; renderSkills(); renderTaskPanel(); });
     s.appendChild(row);
   }
