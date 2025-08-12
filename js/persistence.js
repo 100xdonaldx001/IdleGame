@@ -1,4 +1,4 @@
-import {data} from './data.js';
+import {data, skills} from './data.js';
 import {stats} from './stats.js';
 import {SAVE_KEY} from './constants.js';
 import {showToast} from './toast.js';
@@ -26,6 +26,9 @@ export function load() {
       applyUpgradeEffects();
     } catch (e) { console.warn('Load failed', e); }
   }
+  skills.forEach(s => {
+    if (!data.skills[s]) data.skills[s] = { lvl: 1, xp: 0, task: null };
+  });
   el('#optAutosave').checked = !!data.meta.autosave;
   el('#optDebug').checked = !!data.meta.debug;
   el('#tickInfo').hidden = !data.meta.debug;
