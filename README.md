@@ -15,5 +15,5 @@ IdleGame hosts **Idle Foundry**, a compact Melvor-inspired 2D idle game. Gather 
 3. Progress is saved automatically; use the in-game options to export or import saves.
 
 ## Development
-The code is organized into separate HTML, CSS and JavaScript files. Skill data lives in dedicated folders under `js/skills` for easier maintenance and extension.
+The code is organized into separate HTML, CSS and JavaScript files. Skill data lives in dedicated folders under `js/skills`, and all item definitions are centralized in `js/items.js` for easier maintenance and extension.
 

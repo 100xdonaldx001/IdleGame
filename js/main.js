@@ -1,3 +1,4 @@
+import items from './items.js';
 import Woodcutting from './skills/Woodcutting/index.js';
 import Mining from './skills/Mining/index.js';
 import Fishing from './skills/Fishing/index.js';
@@ -14,7 +15,12 @@ const VERSION = '1.0.1';
 const TICK_MS = 250; // game ticks
 const SAVE_KEY = 'idleFoundrySaveV1';
 
-// --- DATA MODEL ----------------------------------------------------------
+const skillModules = { Woodcutting, Mining, Fishing, Smithing, Cooking, Combat };
+const skills = Object.keys(skillModules);
+const nodes = Object.fromEntries(skills.map(k=>[k, skillModules[k].nodes]));
+const inventory = Object.fromEntries(items.map(i=>[i.key,0]));
+const itemMap = Object.fromEntries(items.map(i=>[i.key,i.name]));
+
 const data = {
   meta: {version: VERSION, created: Date.now(), last: Date.now(), autosave:true, debug:false, offlineCapHrs:8},
   gold: 0,
@@ -27,25 +33,14 @@ const data = {
     Cooking: {lvl:1, xp:0, task:null},
     Combat: {lvl:1, xp:0, task:null}
   },
-  inventory: {twig:0, oak:0, yew:0, pebble:0, iron:0, mythril:0, fish:0, bar:0, meal:0, gem:0, skin:0},
+  inventory,
   upgrades: {},
   craftingQueue: [],
   activeSkill: 'Woodcutting',
   // combat
   combat: {running:false, area:'Glade', player:{hpMax:50,hp:50,atk:4,def:2,spd:1.0,crit:0.05}, enemyKey:'Slime', progress:0},
   // achievements simple
-  ach: {}
-};
-
-const skills = ['Woodcutting','Mining','Fishing','Smithing','Cooking','Combat'];
-
-const nodes = {
-  Woodcutting,
-  Mining,
-  Fishing,
-  Smithing,
-  Cooking,
-  Combat,
+  ach: {},
 };
 
 // Many upgrades
@@ -302,7 +297,8 @@ function renderInventory(){
   const g=el('#invGrid'); g.innerHTML='';
   for(const [k,v] of Object.entries(data.inventory)){
     const card=document.createElement('div'); card.className='panel';
-    card.innerHTML=`<div class="phead"><b>${k}</b><small class="muted">Resource</small></div><div class="kv"><b>${fmt(v)}</b></div>`;
+    const name=itemMap[k]||k;
+    card.innerHTML=`<div class="phead"><b>${name}</b><small class="muted">Resource</small></div><div class="kv"><b>${fmt(v)}</b></div>`;
     g.appendChild(card);
   }
 }
@@ -394,22 +390,7 @@ function addSkillXP(skill, amount){
   if(lvlNow>sk.lvl){ sk.lvl=lvlNow; showToast(`${skill} → Lv.${lvlNow}!`); }
 }
 
-function performNode(skill, node){
-  // costs
-  if(node.consume && !Object.entries(node.consume).every(([k,v])=> (data.inventory[k]||0)>=v )) return false;
-  if(node.consume) for(const [k,v] of Object.entries(node.consume)) data.inventory[k]-=v;
-  // yields
-  for(const [k,[a,b]] of Object.entries(node.yield||{})) addInventory(k, randInt(a,b));
-  if(node.yield && node.yield.gold){ data.gold += randInt(...node.yield.gold); }
-  if(node.yield && node.yield.xp){ addSkillXP('Combat', randInt(...node.yield.xp)); }
-  addSkillXP(skill, node.xp);
-  // bonus: crafting items value buff
-  if(skill==='Smithing' || skill==='Cooking'){
-    const extra = (mul.craftValue()-1);
-    if(node.yield && node.yield.gold && extra>0){ data.gold = Math.floor(data.gold + randInt(...node.yield.gold)*extra); }
-  }
-  return true;
-}
+const helpers = {addInventory, addSkillXP, randInt, mul};
 
 // --- CRAFTING QUEUE TICK -------------------------------------------------
 function craftingTick(dt){
@@ -528,11 +509,11 @@ function runTests(){
     assert('globalXP baseline 1', Math.abs(mul.globalXP()-1)<1e-9);
     assert('globalSpeed baseline 1', Math.abs(mul.globalSpeed()-1)<1e-9);
 
-    // 4) performNode respects costs
+    // 4) Smithing.perform respects costs
     data.inventory={twig:0, oak:0, yew:0, pebble:0, iron:0, mythril:0, fish:0, bar:0, meal:0, gem:0, skin:0};
     const smelt=nodes.Smithing[0];
-    assert('smelt fails with no iron', performNode('Smithing', smelt)===false);
-    data.inventory.iron=3; const bBefore=data.inventory.bar||0; assert('smelt succeeds with iron', performNode('Smithing', smelt)===true);
+    assert('smelt fails with no iron', Smithing.perform(data, smelt, helpers)===false);
+    data.inventory.iron=3; const bBefore=data.inventory.bar||0; assert('smelt succeeds with iron', Smithing.perform(data, smelt, helpers)===true);
     assert('bar increased by 1', data.inventory.bar === bBefore + 1);
 
   } finally {
@@ -563,7 +544,7 @@ function tick(dt){
   if(node){
     data.skills[skill]._prog=(data.skills[skill]._prog||0)+dt*(mul.globalSpeed()*mul.skillSpeed(skill));
     const need=node.time;
-    if(data.skills[skill]._prog>=need){ data.skills[skill]._prog-=need; performNode(skill,node); }
+    if(data.skills[skill]._prog>=need){ data.skills[skill]._prog-=need; skillModules[skill].perform(data,node,helpers); }
     const eta = Math.ceil((need - (data.skills[skill]._prog||0)) / 1000);
     el('#taskETA').textContent = `${skill}: ${node.name} · ${eta}s`;
   } else { el('#taskETA').textContent='—'; }
