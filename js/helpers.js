@@ -12,7 +12,10 @@ export function canAfford(cost) {
 
 export function applyUpgradeEffects() {
   const p = data.combat.player;
-  p.hpMax = 50; p.atk = 4; p.def = 2; p.spd = 1.0;
+  const ratio = p.hp / p.hpMax || 1;
+  p.hpMax = 10; p.atk = 4; p.def = 2; p.spd = 1.0;
+  const lvl = data.skills.Endurance ? data.skills.Endurance.lvl : 1;
+  p.hpMax = Math.floor(p.hpMax * Math.pow(1.02, lvl - 1));
   let hpFlat = 0;
   for (const k in data.upgrades) {
     const u = upgrades.find(v => v.key === k); if (!u) continue;
@@ -20,7 +23,7 @@ export function applyUpgradeEffects() {
     if (u.type === 'combatFlat') { if (u.eff.atk) p.atk += u.eff.atk * lvl; if (u.eff.def) p.def += u.eff.def * lvl; if (u.eff.hp) hpFlat += u.eff.hp * lvl; }
     if (u.type === 'combatMul') { if (u.eff.spd) p.spd *= Math.pow(u.eff.spd, lvl); }
   }
-  p.hpMax += hpFlat; p.hp = clamp(p.hp, 1, p.hpMax);
+  p.hpMax += hpFlat; p.hp = clamp(Math.round(p.hpMax * ratio), 1, p.hpMax);
 }
 
 function productOf(pred) {
