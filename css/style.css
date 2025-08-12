@@ -24,6 +24,7 @@ main{overflow:auto}
 .btn.good{background:#122b22;border-color:#1b6a56}
 .btn.bad{background:#2b1215;border-color:#6a1b23}
 .btn.warn{background:#2b2412;border-color:#6a5b1b}
+input[type="search"]{padding:.5rem .7rem;border:1px solid #2a2e49;background:#13172c;color:var(--text);border-radius:9px}
 small.muted{color:var(--muted)}
 .row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .kv{display:flex;align-items:baseline;gap:6px}
