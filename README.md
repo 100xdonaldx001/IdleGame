@@ -8,7 +8,7 @@ IdleGame is an ever-expanding idle universe where each activity is its own fully
 Every branch begins as an independent idle game, but as you progress, their outputs weave together into a unified economy — one where every skill, every system, and every choice feeds into your ultimate empire.
 
 ## Features
-- **Six core skills**: Woodcutting, Mining, Fishing, Smithing, Cooking and Combat.
+- **Eight core skills**: Woodcutting, Mining, Fishing, Smithing, Cooking, Combat, Endurance and Farming.
 - **Inventory & crafting**: Collect wood, ore, fish and more to craft bars, meals and other goods.
 - **Upgrades**: Improve speed, yields and add automation with numerous global and skill-specific upgrades.
 - **Auto-combat**: Fight in a small 2D arena and earn experience and loot even while offline.

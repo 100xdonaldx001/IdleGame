@@ -14,5 +14,11 @@ export default [
   {key:'bar', name:'Metal Bar'},
   {key:'meal', name:'Meal'},
   {key:'gem', name:'Gem'},
-  {key:'skin', name:'Hide'}
+  {key:'skin', name:'Hide'},
+  {key:'wheat', name:'Wheat'},
+  {key:'barley', name:'Barley'},
+  {key:'oat', name:'Oat'},
+  {key:'apple', name:'Apple'},
+  {key:'tomato', name:'Tomato'},
+  {key:'carrot', name:'Carrot'}
 ];
