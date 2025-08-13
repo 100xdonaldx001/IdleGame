@@ -18,9 +18,11 @@ export function applyUpgradeEffects() {
   const lvl = data.skills.Endurance ? data.skills.Endurance.lvl : 1;
   p.hpMax = Math.floor(p.hpMax * Math.pow(1.02, lvl - 1));
   let hpFlat = 0;
+  const now = Date.now();
   for (const k in data.upgrades) {
     const u = upgrades.find(v => v.key === k); if (!u) continue;
-    const lvl = data.upgrades[k];
+    const lvl = u.duration ? (data.upgrades[k] > now ? 1 : 0) : data.upgrades[k];
+    if (!lvl) continue;
     if (u.type === 'combatFlat') { if (u.eff.atk) p.atk += u.eff.atk * lvl; if (u.eff.def) p.def += u.eff.def * lvl; if (u.eff.hp) hpFlat += u.eff.hp * lvl; }
     if (u.type === 'combatMul') { if (u.eff.spd) p.spd *= Math.pow(u.eff.spd, lvl); }
   }
@@ -29,18 +31,22 @@ export function applyUpgradeEffects() {
 
 function productOf(pred) {
   let m = 1;
+  const now = Date.now();
   for (const k in data.upgrades) {
-    const u = upgrades.find(v => v.key === k);
-    if (u && pred(u)) m *= Math.pow(Object.values(u.eff)[0], data.upgrades[k]);
+    const u = upgrades.find(v => v.key === k); if (!u) continue;
+    const lvl = u.duration ? (data.upgrades[k] > now ? 1 : 0) : data.upgrades[k];
+    if (lvl && pred(u)) m *= Math.pow(Object.values(u.eff)[0], lvl);
   }
   return m;
 }
 
 function sumOf(pred) {
   let s = 0;
+  const now = Date.now();
   for (const k in data.upgrades) {
-    const u = upgrades.find(v => v.key === k);
-    if (u && pred(u)) { const key = Object.keys(u.eff)[0]; s += u.eff[key] * data.upgrades[k]; }
+    const u = upgrades.find(v => v.key === k); if (!u) continue;
+    const lvl = u.duration ? (data.upgrades[k] > now ? 1 : 0) : data.upgrades[k];
+    if (lvl && pred(u)) { const key = Object.keys(u.eff)[0]; s += u.eff[key] * lvl; }
   }
   return s;
 }
