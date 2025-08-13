@@ -8,18 +8,27 @@ import {combatTick, drawArena} from './combat.js';
 import {checkAchievements} from './achievementCheck.js';
 import {save} from './persistence.js';
 import {renderStats, renderOverview, renderInventory, renderSkills} from './render.js';
-import {el} from './utils.js';
+import {el, randInt} from './utils.js';
 
 export function tick(dt) {
   stats.totalTicks++;
   const skill = data.activeSkill; const taskKey = data.skills[skill].task; const node = nodes[skill].find(n => n.key === taskKey);
   if (node) {
     data.skills[skill]._prog = (data.skills[skill]._prog || 0) + dt * (mul.globalSpeed() * mul.skillSpeed(skill));
-    const need = node.time;
-    if (data.skills[skill]._prog >= need) { data.skills[skill]._prog -= need; skillModules[skill].perform(data, node, helpers); }
+    let need = Array.isArray(node.time) ? data.skills[skill]._need || randInt(node.time[0], node.time[1]) : node.time;
+    if (Array.isArray(node.time)) data.skills[skill]._need = need;
+    if (data.skills[skill]._prog >= need) {
+      data.skills[skill]._prog -= need;
+      data.skills[skill]._need = null;
+      skillModules[skill].perform(data, node, helpers);
+      need = Array.isArray(node.time) ? data.skills[skill]._need || randInt(node.time[0], node.time[1]) : node.time;
+      if (Array.isArray(node.time)) data.skills[skill]._need = need;
+    }
     const eta = Math.ceil((need - (data.skills[skill]._prog || 0)) / 1000);
     el('#taskETA').textContent = `${skill}: ${node.name} · ${eta}s`;
-  } else { el('#taskETA').textContent = '—'; }
+  } else {
+    el('#taskETA').textContent = '—';
+  }
 
   craftingTick(dt);
   combatTick(dt);

@@ -9,6 +9,8 @@ import {queueCraft} from './crafting.js';
 import {getEnemy} from './combat.js';
 import {el, fmt, xpForLevel, levelFromXP} from './utils.js';
 
+const formatTime = t => Array.isArray(t) ? `${t[0] / 1000}-${t[1] / 1000}s` : `${t / 1000}s`;
+
 export function tabButton(id, label) {
   const b = document.createElement('button'); b.className = 'tab'; b.role = 'tab'; b.textContent = label; b.dataset.tab = id; b.addEventListener('click', () => activateTab(id, b)); return b;
 }
@@ -55,10 +57,13 @@ export function nodeButton(skill, node) {
   const b = document.createElement('button');
   b.className = 'btn';
   b.textContent = node.name;
-  b.title = `${node.time / 1000}s · +${Object.entries(node.yield || {}).map(([k, [a, b]]) => `${a}-${b} ${k}`).join(', ')}${node.consume ? ' · Cost: ' + Object.entries(node.consume).map(([k, v]) => `${v} ${k}`).join(', ') : ''} · +${node.xp} XP`;
+  const timeText = formatTime(node.time);
+  b.title = `${timeText} · +${Object.entries(node.yield || {}).map(([k, [a, b]]) => `${a}-${b} ${k}`).join(', ')}${node.consume ? ' · Cost: ' + Object.entries(node.consume).map(([k, v]) => `${v} ${k}`).join(', ') : ''} · +${node.xp} XP`;
   b.addEventListener('click', () => {
     const cur = data.skills[skill].task;
     data.skills[skill].task = cur === node.key ? null : node.key;
+    data.skills[skill]._prog = 0;
+    data.skills[skill]._need = null;
     if (!data.skills[skill].task) el('#taskETA').textContent = '—';
     renderTaskPanel();
   });
@@ -72,7 +77,8 @@ export function renderTaskPanel() {
   list.forEach(node => {
     const row = document.createElement('div'); row.className = 'item';
     const locked = sk.lvl < node.req;
-    row.innerHTML = `<div><b>${node.name}</b><div class="hint">Req Lv.${node.req} · ${node.time / 1000}s</div></div>`;
+    const timeText = formatTime(node.time);
+    row.innerHTML = `<div><b>${node.name}</b><div class="hint">Req Lv.${node.req} · ${timeText}</div></div>`;
     const b = nodeButton(data.activeSkill, node); if (locked) b.disabled = true; if (sk.task === node.key) b.classList.add('good');
     row.appendChild(b); p.appendChild(row);
   });
@@ -122,7 +128,7 @@ export function renderCrafting() {
     const card = document.createElement('div'); card.className = 'panel';
     const canAff = n.consume ? Object.entries(n.consume).every(([k, v]) => (data.inventory[k] || 0) >= v) : true;
     const btn = `<button class="btn" ${!canAff ? 'disabled' : ''}>Craft</button>`;
-    card.innerHTML = `<div class="phead"><b>${n.name}</b><small class="muted">${n.time / 1000}s</small></div>
+    card.innerHTML = `<div class="phead"><b>${n.name}</b><small class="muted">${formatTime(n.time)}</small></div>
     <div class="list">
       <div class="item"><span>Costs</span><span>${n.consume ? Object.entries(n.consume).map(([k, v]) => `${v} ${k}`).join(', ') : '—'}</span></div>
       <div class="item"><span>Yields</span><span>${Object.entries(n.yield).map(([k, [a, b]]) => `${a}-${b} ${k}`).join(', ')}</span></div>
