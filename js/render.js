@@ -23,7 +23,7 @@ export function activateTab(id, btn) {
 
 export function renderTabs() {
   const t = el('#tabs'); t.innerHTML = '';
-  const list = [['overview', 'Overview'], ['inventory', 'Inventory'], ['upgrades', 'Upgrades'], ['combat', 'Combat'], ['achievements', 'Achievements'], ['settings', 'Settings']];
+  const list = [['overview', 'Overview'], ['inventory', 'Inventory'], ['upgrades', 'Upgrades'], ['farming', 'Farming'], ['combat', 'Combat'], ['achievements', 'Achievements'], ['settings', 'Settings']];
   list.forEach(([id, label], i) => { const b = tabButton(id, label); if (i === 0) b.setAttribute('aria-selected', 'true'); t.appendChild(b); });
   activateTab('overview');
 }
@@ -46,8 +46,15 @@ export function renderSkills() {
     const next = xpForLevel(actual + 1);
     const pct = sk.lvl >= 99 && !data.meta.virtualLevels ? 100 : ((sk.xp - cur) / (next - cur)) * 100;
     const lvlText = data.meta.virtualLevels ? actual : sk.lvl;
-    row.innerHTML = `<div><b>${name}</b><div class="bar"><span style="width:${pct}%"></span></div><small class="muted">Lv ${lvlText} · ${fmt(sk.xp)} XP</small></div><div class="row"><button class="btn ${active ? 'good' : ''}">${active ? 'Training' : 'Train'}</button></div>`;
-    row.querySelector('button').addEventListener('click', () => { data.activeSkill = name; renderSkills(); renderTaskPanel(); });
+    const isFarm = name === 'Farming';
+    const btnText = isFarm ? 'Manage' : active ? 'Training' : 'Train';
+    row.innerHTML = `<div><b>${name}</b><div class="bar"><span style="width:${pct}%"></span></div><small class="muted">Lv ${lvlText} · ${fmt(sk.xp)} XP</small></div><div class="row"><button class="btn ${active && !isFarm ? 'good' : ''}">${btnText}</button></div>`;
+    const btn = row.querySelector('button');
+    if (isFarm) {
+      btn.addEventListener('click', () => { activateTab('farming'); });
+    } else {
+      btn.addEventListener('click', () => { data.activeSkill = name; renderSkills(); renderTaskPanel(); });
+    }
     s.appendChild(row);
   }
 }
@@ -145,6 +152,36 @@ export function renderInventory() {
   }
 }
 
+export function renderFarm() {
+  const g = el('#farmGrid');
+  if (!g) return;
+  g.innerHTML = '';
+  const farm = data.skills.Farming;
+  farm.plots.forEach((plot, i) => {
+    const card = document.createElement('div'); card.className = 'panel';
+    const node = nodes.Farming.find(n => n.key === plot.task);
+    const head = document.createElement('div'); head.className = 'phead'; head.innerHTML = `<b>Field ${i + 1}</b><small class="muted">${node ? node.name : 'Empty'}</small>`; card.appendChild(head);
+    const list = document.createElement('div'); list.className = 'list';
+    const row = document.createElement('div'); row.className = 'item';
+    const sel = document.createElement('select');
+    const opt = document.createElement('option'); opt.value = ''; opt.textContent = 'Empty'; sel.appendChild(opt);
+    nodes.Farming.forEach(n => {
+      const o = document.createElement('option'); o.value = n.key; o.textContent = n.name;
+      if (plot.task === n.key) o.selected = true;
+      if (farm.lvl < n.req) o.disabled = true;
+      sel.appendChild(o);
+    });
+    sel.addEventListener('change', e => { plot.task = e.target.value || null; plot._prog = 0; plot._need = null; renderFarm(); });
+    row.appendChild(sel);
+    if (node) {
+      const need = plot._need || (Array.isArray(node.time) ? node.time[1] : node.time);
+      const eta = Math.ceil((need - (plot._prog || 0)) / 1000);
+      const span = document.createElement('span'); span.textContent = `${eta}s`; row.appendChild(span);
+    }
+    list.appendChild(row); card.appendChild(list); g.appendChild(card);
+  });
+}
+
 export function renderUpgrades() {
   const sel = el('#upgFilter');
   if (sel && !sel.dataset.init) {
@@ -215,5 +252,5 @@ export function renderSettingsFooter() {
 }
 
 export function renderAll() {
-  renderStats(); renderSkills(); renderTaskPanel(); renderOverview(); renderInventory(); renderUpgrades(); renderAchievements(); renderCombatUI();
+  renderStats(); renderSkills(); renderTaskPanel(); renderOverview(); renderInventory(); renderFarm(); renderUpgrades(); renderAchievements(); renderCombatUI();
 }

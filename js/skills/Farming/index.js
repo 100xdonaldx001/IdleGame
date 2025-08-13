@@ -14,9 +14,8 @@ export const nodes = [
 ];
 
 export function perform(state, node, {addInventory, addSkillXP, randInt}) {
-  const fields = state.skills?.Farming?.fields || 1;
-  for (let i = 0; i < fields; i++) {
-    for (const [k, [a, b]] of Object.entries(node.yield || {})) addInventory(k, randInt(a, b));
+  for (const [k, [a, b]] of Object.entries(node.yield || {})) {
+    addInventory(k, randInt(a, b));
   }
   addSkillXP(skill, node.xp);
   return true;

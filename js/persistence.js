@@ -49,6 +49,11 @@ export function load() {
   skills.forEach(s => {
     if (!data.skills[s]) data.skills[s] = { lvl: 1, xp: 0, task: null };
   });
+  const farm = data.skills.Farming;
+  if (farm) {
+    farm.fields = farm.fields || 4;
+    farm.plots = farm.plots || Array.from({length: farm.fields}, () => ({task: null, _prog: 0, _need: null}));
+  }
   el('#optAutosave').checked = !!data.meta.autosave;
   el('#optDebug').checked = !!data.meta.debug;
   el('#tickInfo').hidden = !data.meta.debug;
