@@ -6,6 +6,7 @@ import {mul, addInventory} from './helpers.js';
 import {addSkillXP, helpers} from './progress.js';
 import Smithing from './skills/Smithing/index.js';
 import {el} from './utils.js';
+import items from './items.js';
 
 function deepAssign(target, source) {
   Object.keys(target).forEach(k => { delete target[k]; });
@@ -29,11 +30,11 @@ export function runTests() {
     data.upgrades = {}; assert('globalGain baseline 1', Math.abs(mul.globalGain() - 1) < 1e-9);
     assert('globalXP baseline 1', Math.abs(mul.globalXP() - 1) < 1e-9);
     assert('globalSpeed baseline 1', Math.abs(mul.globalSpeed() - 1) < 1e-9);
-    data.inventory = {twig:0, pine:0, baobab:0, pebble:0, iron:0, mythril:0, fish:0, bar:0, meal:0, gem:0, skin:0};
-    const smelt = nodes.Smithing[0];
-    assert('smelt fails with no iron', Smithing.perform(data, smelt, helpers) === false);
-    data.inventory.iron = 3; const bBefore = data.inventory.bar || 0; assert('smelt succeeds with iron', Smithing.perform(data, smelt, helpers) === true);
-    assert('bar increased by 1', data.inventory.bar === bBefore + 1);
+    data.inventory = Object.fromEntries(items.map(i => [i.key, 0]));
+    const smelt = nodes.Smithing.find(n => n.key === 'copperBar');
+    assert('smelt fails with no copper', Smithing.perform(data, smelt, helpers) === false);
+    data.inventory.copper = 3; const bBefore = data.inventory.copperBar || 0; assert('smelt succeeds with copper', Smithing.perform(data, smelt, helpers) === true);
+    assert('copperBar increased by 1', data.inventory.copperBar === bBefore + 1);
   } finally {
     deepAssign(data, dataSnap); deepAssign(stats, statsSnap); setToastSuppressed(false);
   }
