@@ -1,5 +1,7 @@
 import {load} from './persistence.js';
-import {renderTabs, renderAll, renderSettingsFooter} from './render.js';
+import {renderTabs} from './render/tabs.js';
+import {renderAll} from './renderer.js';
+import {renderSettingsFooter} from './render/settings.js';
 import {runTests} from './tests.js';
 import {applyOfflineProgress} from './offline.js';
 import {showToast} from './toast.js';

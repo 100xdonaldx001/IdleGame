@@ -7,7 +7,11 @@ import {craftingTick} from './crafting.js';
 import {combatTick, drawArena} from './combat.js';
 import {checkAchievements} from './achievementCheck.js';
 import {save} from './persistence.js';
-import {renderStats, renderOverview, renderInventory, renderSkills, renderFarm} from './render.js';
+import {renderStats} from './render/stats.js';
+import {renderOverview} from './render/overview.js';
+import {renderInventory} from './render/inventory.js';
+import {renderSkills} from './render/skills.js';
+import {renderFarm} from './render/farm.js';
 import {el, randInt} from './utils.js';
 
 export function tick(dt) {

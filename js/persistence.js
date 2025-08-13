@@ -5,7 +5,7 @@ import {showToast} from './toast.js';
 import {el} from './utils.js';
 import {addInventory} from './helpers.js';
 import {applyUpgradeEffects} from './helpers.js';
-import {renderAll} from './render.js';
+import {renderAll} from './renderer.js';
 
 function convertLegacyLogs() {
   const inv = data.inventory || {};
