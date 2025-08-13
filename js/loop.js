@@ -7,7 +7,7 @@ import {craftingTick} from './crafting.js';
 import {combatTick, drawArena} from './combat.js';
 import {checkAchievements} from './achievementCheck.js';
 import {save} from './persistence.js';
-import {renderStats, renderOverview, renderInventory, renderSkills} from './render.js';
+import {renderStats, renderOverview, renderInventory, renderSkills, renderFarm} from './render.js';
 import {el, randInt} from './utils.js';
 
 export function tick(dt) {
@@ -30,6 +30,25 @@ export function tick(dt) {
     el('#taskETA').textContent = '—';
   }
 
+  const farm = data.skills.Farming;
+  if (farm && farm.plots) {
+    farm.plots.forEach(plot => {
+      if (!plot.task) return;
+      const fNode = nodes.Farming.find(n => n.key === plot.task);
+      if (!fNode) return;
+      plot._prog = (plot._prog || 0) + dt * (mul.globalSpeed() * mul.skillSpeed('Farming'));
+      let need = Array.isArray(fNode.time) ? plot._need || randInt(fNode.time[0], fNode.time[1]) : fNode.time;
+      if (Array.isArray(fNode.time)) plot._need = need;
+      if (plot._prog >= need) {
+        plot._prog -= need;
+        plot._need = null;
+        skillModules.Farming.perform(data, fNode, helpers);
+        need = Array.isArray(fNode.time) ? plot._need || randInt(fNode.time[0], fNode.time[1]) : fNode.time;
+        if (Array.isArray(fNode.time)) plot._need = need;
+      }
+    });
+  }
+
   craftingTick(dt);
   combatTick(dt);
   checkAchievements();
@@ -41,6 +60,7 @@ export function tick(dt) {
     renderOverview();
     renderInventory();
     renderSkills();
+    renderFarm();
   }
 }
 

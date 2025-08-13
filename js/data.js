@@ -18,7 +18,10 @@ export const itemMap = Object.fromEntries(items.map(i => [i.key, i.name]));
 function baseSkills() {
   const obj = {};
   skills.forEach(s => { obj[s] = { lvl: 1, xp: 0, task: null }; });
-  if (obj.Farming) obj.Farming.fields = 4;
+  if (obj.Farming) {
+    obj.Farming.fields = 4;
+    obj.Farming.plots = Array.from({length: 4}, () => ({task: null, _prog: 0, _need: null}));
+  }
   return obj;
 }
 

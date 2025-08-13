@@ -4,7 +4,7 @@
 
     <section class="panel">
       <div class="phead"><b>Active Task</b><small id="taskETA" class="muted">—</small></div>
-      <div class="list" id="taskPanel"></div>
+      <div id="taskPanel"></div>
     </section>
 
     <section class="panel" id="tab-overview" role="tabpanel">
@@ -21,15 +21,7 @@
       <div class="phead"><b>Equipment</b><small class="muted">Manage your tools</small></div>
       <div class="grid" id="eqGrid"></div>
     </section>
-
-    <section class="panel" id="tab-crafting" role="tabpanel" hidden>
-      <div class="phead"><b>Crafting</b><small class="muted">Turn resources into useful goods</small></div>
-      <div class="row" style="margin-bottom:8px">
-        <input type="search" id="craftSearch" placeholder="Search by item" style="flex:1">
-      </div>
-      <div class="grid" id="craftGrid"></div>
-    </section>
-
+  
     <section class="panel" id="tab-upgrades" role="tabpanel" hidden>
       <div class="phead"><b>Upgrades</b><small class="muted">Permanent boosts</small></div>
       <div class="row">
@@ -39,6 +31,11 @@
         </select>
       </div>
       <div class="grid" id="upgGrid"></div>
+    </section>
+
+    <section class="panel" id="tab-farming" role="tabpanel" hidden>
+      <div class="phead"><b>Farming</b><small class="muted">Manage your fields</small></div>
+      <div class="grid" id="farmGrid"></div>
     </section>
 
     <section class="panel" id="tab-combat" role="tabpanel" hidden>
