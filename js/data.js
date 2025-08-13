@@ -28,6 +28,8 @@ export const data = {
   xp: 0,
   skills: baseSkills(),
   inventory,
+  equipment: [],
+  equipped: {},
   upgrades: {},
   craftingQueue: [],
   activeSkill: 'Woodcutting',

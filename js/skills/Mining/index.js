@@ -15,10 +15,11 @@ export const nodes = [
   {key: diamond.key, name: 'Diamond Deposit', time: 9000, yield: {[diamond.key]: [1, 1]}, xp: 75, req: 99},
 ];
 
-export function perform(state, node, {addInventory, addSkillXP, randInt}) {
+export function perform(state, node, {addInventory, addSkillXP, randInt, mul}) {
   if(node.consume && !Object.entries(node.consume).every(([k,v])=> (state.inventory[k]||0)>=v)) return false;
   if(node.consume) for(const [k,v] of Object.entries(node.consume)) state.inventory[k]-=v;
-  for(const [k,[a,b]] of Object.entries(node.yield||{})) addInventory(k, randInt(a,b));
+  const bonus = mul.equipYield ? mul.equipYield(skill) : 1;
+  for(const [k,[a,b]] of Object.entries(node.yield||{})) addInventory(k, Math.floor(randInt(a,b) * bonus));
   addSkillXP(skill, node.xp);
   return true;
 }

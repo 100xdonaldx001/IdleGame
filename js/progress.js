@@ -1,5 +1,6 @@
 import {data} from './data.js';
 import {mul, addInventory, applyUpgradeEffects} from './helpers.js';
+import {addEquipment} from './equipment.js';
 import {randInt, levelFromXP} from './utils.js';
 import {showToast} from './toast.js';
 
@@ -15,4 +16,4 @@ export function addSkillXP(skill, amount) {
   }
 }
 
-export const helpers = {addInventory, addSkillXP, randInt, mul};
+export const helpers = {addInventory, addEquipment, addSkillXP, randInt, mul};

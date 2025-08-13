@@ -42,6 +42,8 @@ export function load() {
       Object.assign(stats, obj.stats || {});
       convertLegacyLogs();
       data.inventory = Object.assign({}, baseInventory, data.inventory);
+      if (!Array.isArray(data.equipment)) data.equipment = [];
+      if (!data.equipped) data.equipped = {};
       applyUpgradeEffects();
       if (data.meta.virtualLevels == null) data.meta.virtualLevels = false;
     } catch (e) { console.warn('Load failed', e); }
@@ -71,6 +73,8 @@ export async function importSave() {
     Object.assign(stats, obj.stats || {});
     convertLegacyLogs();
     data.inventory = Object.assign({}, baseInventory, data.inventory);
+    if (!Array.isArray(data.equipment)) data.equipment = [];
+    if (!data.equipped) data.equipped = {};
     applyUpgradeEffects();
     save();
     renderAll();

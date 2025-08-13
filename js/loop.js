@@ -14,7 +14,7 @@ export function tick(dt) {
   stats.totalTicks++;
   const skill = data.activeSkill; const taskKey = data.skills[skill].task; const node = nodes[skill].find(n => n.key === taskKey);
   if (node) {
-    data.skills[skill]._prog = (data.skills[skill]._prog || 0) + dt * (mul.globalSpeed() * mul.skillSpeed(skill));
+    data.skills[skill]._prog = (data.skills[skill]._prog || 0) + dt * (mul.globalSpeed() * mul.skillSpeed(skill) * mul.equipSpeed(skill));
     let need = Array.isArray(node.time) ? data.skills[skill]._need || randInt(node.time[0], node.time[1]) : node.time;
     if (Array.isArray(node.time)) data.skills[skill]._need = need;
     if (data.skills[skill]._prog >= need) {

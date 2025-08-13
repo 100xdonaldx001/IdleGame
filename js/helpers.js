@@ -1,6 +1,7 @@
 import {data} from './data.js';
 import upgrades from './upgrades/index.js';
 import {clamp} from './utils.js';
+import {getBonus} from './equipment.js';
 
 export function addInventory(key, amount) {
   data.inventory[key] = (data.inventory[key] || 0) + amount;
@@ -52,4 +53,6 @@ export const mul = {
   skillSpeed: skill => productOf(u => u.type === skill && u.eff.speed),
   craftValue: () => productOf(u => u.type === 'craft' && u.eff.craftValue),
   offlineFrac: skill => sumOf(u => u.type === skill && u.eff.offline),
+  equipSpeed: skill => getBonus(skill).speed,
+  equipYield: skill => getBonus(skill).yield,
 };
