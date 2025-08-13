@@ -14,5 +14,10 @@ export default [
   {key:'bar', name:'Metal Bar'},
   {key:'meal', name:'Meal'},
   {key:'gem', name:'Gem'},
-  {key:'skin', name:'Hide'}
+  {key:'skin', name:'Hide'},
+  {key:'egg', name:'Egg'},
+  {key:'feather', name:'Feather'},
+  {key:'wool', name:'Wool'},
+  {key:'bone', name:'Bone'},
+  {key:'scale', name:'Scale'}
 ];

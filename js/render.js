@@ -183,10 +183,17 @@ export function renderCombatUI() {
   rows.forEach(([k, v]) => { const d = document.createElement('div'); d.className = 'item'; d.innerHTML = `<span>${k}</span><b>${v}</b>`; s.appendChild(d); });
 
   const l = el('#enemyList'); l.innerHTML = '';
-  enemies[data.combat.area].forEach(x => {
-    const d = document.createElement('div'); d.className = 'item'; d.innerHTML = `<div><b>${x.key}</b><div class="hint">${x.hp} HP · ${x.atk}/${x.def}/${x.spd}</div></div><button class="btn">Target</button>`;
-    d.querySelector('button').addEventListener('click', () => { data.combat.enemyKey = x.key; el('#combatInfo').textContent = 'Target:' + x.key; });
-    l.appendChild(d);
+  const groups = enemies[data.combat.area].reduce((a, x) => {
+    (a[x.cat] ||= []).push(x);
+    return a;
+  }, {});
+  Object.keys(groups).forEach(cat => {
+    const head = document.createElement('div'); head.className = 'phead'; head.innerHTML = `<b>${cat}</b>`; l.appendChild(head);
+    groups[cat].forEach(x => {
+      const d = document.createElement('div'); d.className = 'item'; d.innerHTML = `<div><b>${x.key}</b><div class="hint">${x.hp} HP · ${x.atk}/${x.def}/${x.spd}</div></div><button class="btn">Target</button>`;
+      d.querySelector('button').addEventListener('click', () => { data.combat.enemyKey = x.key; el('#combatInfo').textContent = 'Target:' + x.key; });
+      l.appendChild(d);
+    });
   });
 }
 
