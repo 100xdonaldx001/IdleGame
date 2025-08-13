@@ -2,12 +2,17 @@ import items from '../../items.js';
 
 const skill = 'Woodcutting';
 const map = Object.fromEntries(items.map(i => [i.key, i]));
-const { twig, oak, yew } = map;
+const { twig, pine, birch, poplar, cedar, walnut, chestnut, baobab } = map;
 
 export const nodes = [
-  {key: twig.key, name: 'Twigs', time: 2000, yield: {[twig.key]: [1, 2]}, xp: 4, req: 1},
-  {key: oak.key, name: 'Oak', time: 3500, yield: {[oak.key]: [3, 5]}, xp: 8, req: 5},
-  {key: yew.key, name: 'Yew', time: 5000, yield: {[yew.key]: [6, 8]}, xp: 14, req: 12},
+  {key: twig.key, name: 'Twigs', time: 2000, yield: {[twig.key]: [1, 1]}, xp: 5, req: 1},
+  {key: pine.key, name: 'Pine', time: 3000, yield: {[pine.key]: [1, 1]}, xp: 12, req: 15},
+  {key: birch.key, name: 'Birch', time: 4000, yield: {[birch.key]: [1, 1]}, xp: 20, req: 30},
+  {key: poplar.key, name: 'Poplar', time: 5000, yield: {[poplar.key]: [1, 1]}, xp: 29, req: 45},
+  {key: cedar.key, name: 'Cedar', time: 6000, yield: {[cedar.key]: [1, 1]}, xp: 39, req: 60},
+  {key: walnut.key, name: 'Walnut', time: 7000, yield: {[walnut.key]: [1, 1]}, xp: 50, req: 75},
+  {key: chestnut.key, name: 'Chestnut', time: 8000, yield: {[chestnut.key]: [1, 1]}, xp: 62, req: 90},
+  {key: baobab.key, name: 'Baobab', time: 9000, yield: {[baobab.key]: [1, 1]}, xp: 75, req: 99},
 ];
 
 export function perform(state, node, {addInventory, addSkillXP, randInt}) {

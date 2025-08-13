@@ -29,7 +29,7 @@ export function runTests() {
     data.upgrades = {}; assert('globalGain baseline 1', Math.abs(mul.globalGain() - 1) < 1e-9);
     assert('globalXP baseline 1', Math.abs(mul.globalXP() - 1) < 1e-9);
     assert('globalSpeed baseline 1', Math.abs(mul.globalSpeed() - 1) < 1e-9);
-    data.inventory = {twig:0, oak:0, yew:0, pebble:0, iron:0, mythril:0, fish:0, bar:0, meal:0, gem:0, skin:0};
+    data.inventory = {twig:0, pine:0, baobab:0, pebble:0, iron:0, mythril:0, fish:0, bar:0, meal:0, gem:0, skin:0};
     const smelt = nodes.Smithing[0];
     assert('smelt fails with no iron', Smithing.perform(data, smelt, helpers) === false);
     data.inventory.iron = 3; const bBefore = data.inventory.bar || 0; assert('smelt succeeds with iron', Smithing.perform(data, smelt, helpers) === true);
