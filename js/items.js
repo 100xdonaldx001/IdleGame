@@ -59,5 +59,9 @@ export default [
   {key:'oat', name:'Oat'},
   {key:'apple', name:'Apple'},
   {key:'tomato', name:'Tomato'},
-  {key:'carrot', name:'Carrot'}
+  {key:'carrot', name:'Carrot'},
+  {key:'bread', name:'Bread'},
+  {key:'stew', name:'Stew'},
+  {key:'pie', name:'Pie'},
+  {key:'fishStew', name:'Fish Stew'}
 ];
