@@ -5,7 +5,6 @@ import {VERSION} from './constants.js';
 import achievements from './achievements.js';
 import enemies from './enemies.js';
 import {mul, canAfford, applyUpgradeEffects} from './helpers.js';
-import {queueCraft} from './crafting.js';
 import {getEnemy} from './combat.js';
 import {el, fmt, xpForLevel, levelFromXP} from './utils.js';
 
@@ -24,7 +23,7 @@ export function activateTab(id, btn) {
 
 export function renderTabs() {
   const t = el('#tabs'); t.innerHTML = '';
-  const list = [['overview', 'Overview'], ['inventory', 'Inventory'], ['crafting', 'Crafting'], ['upgrades', 'Upgrades'], ['combat', 'Combat'], ['achievements', 'Achievements'], ['settings', 'Settings']];
+  const list = [['overview', 'Overview'], ['inventory', 'Inventory'], ['upgrades', 'Upgrades'], ['combat', 'Combat'], ['achievements', 'Achievements'], ['settings', 'Settings']];
   list.forEach(([id, label], i) => { const b = tabButton(id, label); if (i === 0) b.setAttribute('aria-selected', 'true'); t.appendChild(b); });
   activateTab('overview');
 }
@@ -72,16 +71,50 @@ export function nodeButton(skill, node) {
 
 export function renderTaskPanel() {
   const p = el('#taskPanel'); p.innerHTML = '';
-  const sk = data.skills[data.activeSkill];
-  const list = nodes[data.activeSkill];
-  list.forEach(node => {
-    const row = document.createElement('div'); row.className = 'item';
-    const locked = sk.lvl < node.req;
-    const timeText = formatTime(node.time);
-    row.innerHTML = `<div><b>${node.name}</b><div class="hint">Req Lv.${node.req} · ${timeText}</div></div>`;
-    const b = nodeButton(data.activeSkill, node); if (locked) b.disabled = true; if (sk.task === node.key) b.classList.add('good');
-    row.appendChild(b); p.appendChild(row);
-  });
+  const skillName = data.activeSkill;
+  const sk = data.skills[skillName];
+  const list = nodes[skillName].slice().sort((a, b) => a.req - b.req);
+  if (skillName === 'Smithing') {
+    p.className = 'grid';
+    list.forEach(node => {
+      const card = document.createElement('div'); card.className = 'panel';
+      const locked = sk.lvl < node.req;
+      const timeText = formatTime(node.time);
+      const costText = node.consume ? Object.entries(node.consume).map(([k, v]) => `${v} ${k}`).join(', ') : '—';
+      const yieldText = Object.entries(node.yield || {}).map(([k, [a, b]]) => `${a}-${b} ${k}`).join(', ');
+      card.innerHTML = `<div class="phead"><b>${node.name}</b><small class="muted">Lv ${node.req} · ${timeText}</small></div>
+      <div class="list">
+        <div class="item"><span>Costs</span><span>${costText}</span></div>
+        <div class="item"><span>Yields</span><span>${yieldText}</span></div>
+      </div>`;
+      const b = document.createElement('button'); b.className = 'btn'; b.textContent = sk.task === node.key ? 'Stop' : 'Train';
+      if (locked) b.disabled = true; if (sk.task === node.key) b.classList.add('good');
+      b.addEventListener('click', () => {
+        const cur = data.skills[skillName].task;
+        data.skills[skillName].task = cur === node.key ? null : node.key;
+        data.skills[skillName]._prog = 0;
+        data.skills[skillName]._need = null;
+        if (!data.skills[skillName].task) el('#taskETA').textContent = '—';
+        renderTaskPanel();
+      });
+      const footer = document.createElement('div'); footer.className = 'footer';
+      footer.appendChild(b);
+      const xp = document.createElement('small'); xp.className = 'muted'; xp.textContent = `+${node.xp} XP`;
+      footer.appendChild(xp);
+      card.appendChild(footer);
+      p.appendChild(card);
+    });
+  } else {
+    p.className = 'list';
+    list.forEach(node => {
+      const row = document.createElement('div'); row.className = 'item';
+      const locked = sk.lvl < node.req;
+      const timeText = formatTime(node.time);
+      row.innerHTML = `<div><b>${node.name}</b><div class="hint">Req Lv.${node.req} · ${timeText}</div></div>`;
+      const b = nodeButton(skillName, node); if (locked) b.disabled = true; if (sk.task === node.key) b.classList.add('good');
+      row.appendChild(b); p.appendChild(row);
+    });
+  }
 }
 
 export function renderOverview() {
@@ -110,33 +143,6 @@ export function renderInventory() {
     card.innerHTML = `<div class="phead"><b>${name}</b><small class="muted">Resource</small></div><div class="kv"><b>${fmt(v)}</b></div>`;
     g.appendChild(card);
   }
-}
-
-export function renderCrafting() {
-  const g = el('#craftGrid'); g.innerHTML = '';
-  const q = (el('#craftSearch')?.value || '').trim().toLowerCase();
-  const list = [...nodes.Smithing, ...nodes.Cooking].filter(n => {
-    if (!q) return true;
-    const names = [
-      ...Object.keys(n.consume || {}),
-      ...Object.keys(n.yield),
-      n.name
-    ].map(k => (itemMap[k] || k).toLowerCase());
-    return names.some(x => x.includes(q));
-  });
-  list.forEach(n => {
-    const card = document.createElement('div'); card.className = 'panel';
-    const canAff = n.consume ? Object.entries(n.consume).every(([k, v]) => (data.inventory[k] || 0) >= v) : true;
-    const btn = `<button class="btn" ${!canAff ? 'disabled' : ''}>Craft</button>`;
-    card.innerHTML = `<div class="phead"><b>${n.name}</b><small class="muted">${formatTime(n.time)}</small></div>
-    <div class="list">
-      <div class="item"><span>Costs</span><span>${n.consume ? Object.entries(n.consume).map(([k, v]) => `${v} ${k}`).join(', ') : '—'}</span></div>
-      <div class="item"><span>Yields</span><span>${Object.entries(n.yield).map(([k, [a, b]]) => `${a}-${b} ${k}`).join(', ')}</span></div>
-    </div>
-    <div class="footer">${btn}<small class="muted">+${n.xp} XP</small></div>`;
-    const b = card.querySelector('button'); b.addEventListener('click', () => queueCraft(n));
-    g.appendChild(card);
-  });
 }
 
 export function renderUpgrades() {
@@ -209,5 +215,5 @@ export function renderSettingsFooter() {
 }
 
 export function renderAll() {
-  renderStats(); renderSkills(); renderTaskPanel(); renderOverview(); renderInventory(); renderCrafting(); renderUpgrades(); renderAchievements(); renderCombatUI();
+  renderStats(); renderSkills(); renderTaskPanel(); renderOverview(); renderInventory(); renderUpgrades(); renderAchievements(); renderCombatUI();
 }
