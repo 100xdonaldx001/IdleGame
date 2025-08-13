@@ -51,10 +51,15 @@ export const nodes = [
   })),
 ];
 
-export function perform(state, node, {addInventory, addSkillXP, randInt}) {
+export function perform(state, node, {addInventory, addEquipment, addSkillXP, randInt}) {
   if (node.consume && !Object.entries(node.consume).every(([k, v]) => (state.inventory[k] || 0) >= v)) return false;
   if (node.consume) for (const [k, v] of Object.entries(node.consume)) state.inventory[k] -= v;
-  for (const [k, [a, b]] of Object.entries(node.yield || {})) addInventory(k, randInt(a, b));
+  for (const [k, [a, b]] of Object.entries(node.yield || {})) {
+    const amt = randInt(a, b);
+    for (let i = 0; i < amt; i++) {
+      if (!addEquipment(k)) addInventory(k, 1);
+    }
+  }
   addSkillXP(skill, node.xp);
   return true;
 }

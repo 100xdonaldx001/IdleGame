@@ -5,6 +5,7 @@ import {VERSION} from './constants.js';
 import achievements from './achievements.js';
 import enemies from './enemies.js';
 import {mul, canAfford, applyUpgradeEffects} from './helpers.js';
+import {equipItem} from './equipment.js';
 import {getEnemy} from './combat.js';
 import {el, fmt, xpForLevel, levelFromXP} from './utils.js';
 
@@ -23,7 +24,7 @@ export function activateTab(id, btn) {
 
 export function renderTabs() {
   const t = el('#tabs'); t.innerHTML = '';
-  const list = [['overview', 'Overview'], ['inventory', 'Inventory'], ['upgrades', 'Upgrades'], ['farming', 'Farming'], ['combat', 'Combat'], ['achievements', 'Achievements'], ['settings', 'Settings']];
+  const list = [['overview', 'Overview'], ['inventory', 'Inventory'], ['equipment', 'Equipment'],  ['upgrades', 'Upgrades'], ['farming', 'Farming'], ['combat', 'Combat'], ['achievements', 'Achievements'], ['settings', 'Settings']];
   list.forEach(([id, label], i) => { const b = tabButton(id, label); if (i === 0) b.setAttribute('aria-selected', 'true'); t.appendChild(b); });
   activateTab('overview');
 }
@@ -152,6 +153,22 @@ export function renderInventory() {
   }
 }
 
+export function renderEquipment() {
+  const g = el('#eqGrid'); if (!g) return; g.innerHTML = '';
+  data.equipment.forEach(it => {
+    const card = document.createElement('div'); card.className = 'panel';
+    const eq = data.equipped[it.skill] === it.id;
+    card.innerHTML = `<div class="phead"><b>${it.name}</b><small class="muted">${it.skill}</small></div>
+    <div class="list">
+      <div class="item"><span>Speed</span><span>+${Math.round(it.speed * 100)}%</span></div>
+      <div class="item"><span>Yield</span><span>+${Math.round(it.yield * 100)}%</span></div>
+    </div>
+    <div class="footer"><button class="btn ${eq ? 'good' : ''}">${eq ? 'Equipped' : 'Equip'}</button></div>`;
+    card.querySelector('button').addEventListener('click', () => { equipItem(it.id); renderEquipment(); });
+    g.appendChild(card);
+  });
+}
+
 export function renderFarm() {
   const g = el('#farmGrid');
   if (!g) return;
@@ -252,5 +269,5 @@ export function renderSettingsFooter() {
 }
 
 export function renderAll() {
-  renderStats(); renderSkills(); renderTaskPanel(); renderOverview(); renderInventory(); renderFarm(); renderUpgrades(); renderAchievements(); renderCombatUI();
+  renderStats(); renderSkills(); renderTaskPanel(); renderOverview(); renderInventory(); renderEquipment(); renderFarm(); renderUpgrades(); renderAchievements(); renderCombatUI();
 }
