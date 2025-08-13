@@ -1,4 +1,4 @@
-import {data, skills} from './data.js';
+import {data, skills, inventory as baseInventory} from './data.js';
 import {stats} from './stats.js';
 import {SAVE_KEY} from './constants.js';
 import {showToast} from './toast.js';
@@ -6,6 +6,23 @@ import {el} from './utils.js';
 import {addInventory} from './helpers.js';
 import {applyUpgradeEffects} from './helpers.js';
 import {renderAll} from './render.js';
+
+function convertLegacyLogs() {
+  const inv = data.inventory || {};
+  if (inv.oak) {
+    inv.pine = (inv.pine || 0) + inv.oak;
+    delete inv.oak;
+  }
+  if (inv.yew) {
+    inv.birch = (inv.birch || 0) + inv.yew;
+    delete inv.yew;
+  }
+  const wc = data.skills && data.skills.Woodcutting;
+  if (wc) {
+    if (wc.task === 'oak') wc.task = 'pine';
+    if (wc.task === 'yew') wc.task = 'birch';
+  }
+}
 
 export function save() {
   data.meta.last = Date.now();
@@ -23,6 +40,8 @@ export function load() {
       const obj = JSON.parse(raw);
       Object.assign(data, obj.data || {});
       Object.assign(stats, obj.stats || {});
+      convertLegacyLogs();
+      data.inventory = Object.assign({}, baseInventory, data.inventory);
       applyUpgradeEffects();
       if (data.meta.virtualLevels == null) data.meta.virtualLevels = false;
     } catch (e) { console.warn('Load failed', e); }
@@ -50,6 +69,8 @@ export async function importSave() {
     const obj = JSON.parse(decodeURIComponent(escape(atob(b64))));
     Object.assign(data, obj.data || {});
     Object.assign(stats, obj.stats || {});
+    convertLegacyLogs();
+    data.inventory = Object.assign({}, baseInventory, data.inventory);
     applyUpgradeEffects();
     save();
     renderAll();
