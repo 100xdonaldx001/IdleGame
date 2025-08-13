@@ -11,6 +11,9 @@ import {el, fmt, xpForLevel, levelFromXP} from './utils.js';
 
 const formatTime = t => Array.isArray(t) ? `${t[0] / 1000}-${t[1] / 1000}s` : `${t / 1000}s`;
 
+// Track the previously active tab so we can restore it after closing Farming
+let prevTab = 'overview';
+
 export function tabButton(id, label) {
   const b = document.createElement('button'); b.className = 'tab'; b.role = 'tab'; b.textContent = label; b.dataset.tab = id; b.addEventListener('click', () => activateTab(id, b)); return b;
 }
@@ -20,11 +23,13 @@ export function activateTab(id, btn) {
   el('#tab-' + id).hidden = false;
   document.querySelectorAll('.tab').forEach(t => t.setAttribute('aria-selected', 'false'));
   if (btn) btn.setAttribute('aria-selected', 'true');
+  // Remember the last non-farming tab so we can return to it
+  if (id !== 'farming') prevTab = id;
 }
 
 export function renderTabs() {
   const t = el('#tabs'); t.innerHTML = '';
-  const list = [['overview', 'Overview'], ['inventory', 'Inventory'], ['equipment', 'Equipment'],  ['upgrades', 'Upgrades'], ['farming', 'Farming'], ['combat', 'Combat'], ['achievements', 'Achievements'], ['settings', 'Settings']];
+  const list = [['overview', 'Overview'], ['inventory', 'Inventory'], ['equipment', 'Equipment'], ['upgrades', 'Upgrades'], ['combat', 'Combat'], ['achievements', 'Achievements'], ['settings', 'Settings']];
   list.forEach(([id, label], i) => { const b = tabButton(id, label); if (i === 0) b.setAttribute('aria-selected', 'true'); t.appendChild(b); });
   activateTab('overview');
 }
@@ -52,9 +57,26 @@ export function renderSkills() {
     row.innerHTML = `<div><b>${name}</b><div class="bar"><span style="width:${pct}%"></span></div><small class="muted">Lv ${lvlText} · ${fmt(sk.xp)} XP</small></div><div class="row"><button class="btn ${active && !isFarm ? 'good' : ''}">${btnText}</button></div>`;
     const btn = row.querySelector('button');
     if (isFarm) {
-      btn.addEventListener('click', () => { activateTab('farming'); });
+      btn.addEventListener('click', () => {
+        // Toggle the farming panel; if visible, return to the previous tab
+        if (el('#tab-farming').hidden) {
+          activateTab('farming');
+        } else {
+          const btnPrev = document.querySelector(`.tab[data-tab="${prevTab}"]`);
+          activateTab(prevTab, btnPrev);
+        }
+      });
     } else {
-      btn.addEventListener('click', () => { data.activeSkill = name; renderSkills(); renderTaskPanel(); });
+      btn.addEventListener('click', () => {
+        data.activeSkill = name;
+        renderSkills();
+        renderTaskPanel();
+        // If farming menu is open, hide it when switching skills
+        if (!el('#tab-farming').hidden) {
+          const btnPrev = document.querySelector(`.tab[data-tab="${prevTab}"]`);
+          activateTab(prevTab, btnPrev);
+        }
+      });
     }
     s.appendChild(row);
   }
