@@ -1,4 +1,4 @@
-import {data} from './data.js';
+import {data, nodes} from './data.js';
 import {mul} from './helpers.js';
 import {addInventory} from './helpers.js';
 import {addSkillXP} from './progress.js';
@@ -21,7 +21,8 @@ export function craftingTick(dt) {
     for (const [k, [a, b]] of Object.entries(origin.yield)) {
       if (k === 'gold') data.gold += randInt(a, b); else addInventory(k, randInt(a, b));
     }
-    addSkillXP(origin.key === 'bar' || origin.key === 'plate' ? 'Smithing' : 'Cooking', origin.xp);
+    const skillName = nodes.Smithing.some(n => n.key === origin.key) ? 'Smithing' : 'Cooking';
+    addSkillXP(skillName, origin.xp);
     data.craftingQueue.shift();
     showToast(`${origin.name} crafted`);
   }

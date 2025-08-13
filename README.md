@@ -9,7 +9,7 @@ Every branch begins as an independent idle game, but as you progress, their outp
 
 ## Features
 - **Eight core skills**: Woodcutting, Mining, Fishing, Smithing, Cooking, Combat, Endurance and Farming.
-- **Inventory & crafting**: Collect wood, ore, fish and more to craft bars, meals and other goods.
+- **Inventory & crafting**: Collect wood, ore, fish and more to smelt metal bars and forge tools like pickaxes and axes.
 - **Upgrades**: Improve speed, yields and add automation with numerous global and skill-specific upgrades.
 - **Auto-combat**: Fight in a small 2D arena and earn experience and loot even while offline.
 - **Quality of life**: Autosave, export/import saves, achievements and offline progress.
