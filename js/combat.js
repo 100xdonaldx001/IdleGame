@@ -8,16 +8,28 @@ import {randInt, clamp, el} from './utils.js';
 const cvs = el('#arena');
 const ctx = cvs.getContext('2d');
 let lastAtkP = 0, lastAtkE = 0; let enemyHP = 30;
+let currentEnemy = null;
 
 export function getEnemy(key) {
-  return enemies[data.combat.area].find(e => e.key === key) || enemies[data.combat.area][0];
+  if (!currentEnemy || currentEnemy.base !== key) {
+    let e = enemies[data.combat.area].find(e => e.key === key) || enemies[data.combat.area][0];
+    if (e.key === 'Goblin' && Math.random() < 0.01) {
+      e = {...e, key: 'Loot Goblin', gold: [50, 100]};
+    }
+    currentEnemy = {...e, base: key};
+  }
+  return currentEnemy;
 }
 
 export function startStopFight() {
   data.combat.running = !data.combat.running;
   if (data.combat.running) {
+    currentEnemy = null;
     const e = getEnemy(data.combat.enemyKey); enemyHP = e.hp; el('#combatInfo').textContent = 'Fighting ' + e.key;
-  } else el('#combatInfo').textContent = 'Idle';
+  } else {
+    currentEnemy = null;
+    el('#combatInfo').textContent = 'Idle';
+  }
 }
 
 export function combatTick(dt) {
@@ -31,9 +43,10 @@ export function combatTick(dt) {
   if (lastAtkE >= eRate) { lastAtkE -= eRate; const dmg = Math.max(1, e.atk - p.def + randInt(0, 2)); p.hp = clamp(p.hp - dmg, 0, p.hpMax); }
 
   if (enemyHP <= 0) {
-    const g = randInt(...e.gold); data.gold += g;
+    if (e.gold) data.gold += randInt(...e.gold);
     for (const [k, [a, b]] of Object.entries(e.drops || {})) addInventory(k, randInt(a, b));
     addSkillXP('Combat', 12);
+    currentEnemy = null;
     const e2 = getEnemy(data.combat.enemyKey); enemyHP = e2.hp;
     stats.slimeKills += e.key === 'Slime' ? 1 : 0; stats.fightsWon++;
   }
