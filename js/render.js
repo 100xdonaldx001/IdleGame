@@ -113,14 +113,34 @@ export function renderTaskPanel() {
       p.appendChild(card);
     });
   } else {
-    p.className = 'list';
+    p.className = 'grid';
     list.forEach(node => {
-      const row = document.createElement('div'); row.className = 'item';
+      const card = document.createElement('div'); card.className = 'panel';
       const locked = sk.lvl < node.req;
       const timeText = formatTime(node.time);
-      row.innerHTML = `<div><b>${node.name}</b><div class="hint">Req Lv.${node.req} · ${timeText}</div></div>`;
-      const b = nodeButton(skillName, node); if (locked) b.disabled = true; if (sk.task === node.key) b.classList.add('good');
-      row.appendChild(b); p.appendChild(row);
+      const costText = node.consume ? Object.entries(node.consume).map(([k, v]) => `${v} ${k}`).join(', ') : '—';
+      const yieldText = Object.entries(node.yield || {}).map(([k, [a, b]]) => `${a}-${b} ${k}`).join(', ');
+      card.innerHTML = `<div class="phead"><b>${node.name}</b><small class="muted">Lv ${node.req} · ${timeText}</small></div>
+        <div class="list">
+          <div class="item"><span>Costs</span><span>${costText}</span></div>
+          <div class="item"><span>Yields</span><span>${yieldText}</span></div>
+        </div>`;
+      const b = document.createElement('button'); b.className = 'btn'; b.textContent = sk.task === node.key ? 'Stop' : 'Train';
+      if (locked) b.disabled = true; if (sk.task === node.key) b.classList.add('good');
+      b.addEventListener('click', () => {
+        const cur = data.skills[skillName].task;
+        data.skills[skillName].task = cur === node.key ? null : node.key;
+        data.skills[skillName]._prog = 0;
+        data.skills[skillName]._need = null;
+        if (!data.skills[skillName].task) el('#taskETA').textContent = '—';
+        renderTaskPanel();
+      });
+      const footer = document.createElement('div'); footer.className = 'footer';
+      footer.appendChild(b);
+      const xp = document.createElement('small'); xp.className = 'muted'; xp.textContent = `+${node.xp} XP`;
+      footer.appendChild(xp);
+      card.appendChild(footer);
+      p.appendChild(card);
     });
   }
 }
