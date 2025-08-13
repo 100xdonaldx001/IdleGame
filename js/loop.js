@@ -60,6 +60,8 @@ export function tick(dt) {
     renderOverview();
     renderInventory();
     renderSkills();
+  }
+  if (stats.totalTicks % Math.floor(1000 / TICK_MS) === 0) {
     renderFarm();
   }
 }
