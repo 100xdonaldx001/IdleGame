@@ -16,6 +16,7 @@ export function renderSettingsFooter() {
     sel.value = getLang();
     sel.addEventListener('change', e => setLang(e.target.value));
     sel.dataset.init = '1';
+  }
   const cont = el('#optOfflineSkills');
   if (cont) {
     cont.innerHTML = '';
