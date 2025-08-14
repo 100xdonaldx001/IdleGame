@@ -1,12 +1,13 @@
 import {el} from '../utils.js';
+import {t} from '../i18n.js';
 
 export let prevTab = 'overview';
 
-export function tabButton(id, label) {
+export function tabButton(id, labelKey) {
   const b = document.createElement('button');
   b.className = 'tab';
   b.role = 'tab';
-  b.textContent = label;
+  b.textContent = t(labelKey);
   b.dataset.tab = id;
   b.addEventListener('click', () => activateTab(id, b));
   return b;
@@ -21,22 +22,22 @@ export function activateTab(id, btn) {
 }
 
 export function renderTabs() {
-  const t = el('#tabs');
-  t.innerHTML = '';
+  const tEl = el('#tabs');
+  tEl.innerHTML = '';
   const list = [
-    ['overview', 'Overview'],
-    ['inventory', 'Inventory'],
-    ['market', 'Market'],
-    ['equipment', 'Equipment'],
-    ['upgrades', 'Upgrades'],
-    ['combat', 'Combat'],
-    ['achievements', 'Achievements'],
-    ['settings', 'Settings']
+    ['overview', 'overview_title'],
+    ['inventory', 'inventory_title'],
+    ['market', 'market_title'],
+    ['equipment', 'equipment_title'],
+    ['upgrades', 'upgrades_title'],
+    ['combat', 'combat_title'],
+    ['achievements', 'achievements_title'],
+    ['settings', 'settings_title']
   ];
-  list.forEach(([id, label], i) => {
-    const b = tabButton(id, label);
+  list.forEach(([id, key], i) => {
+    const b = tabButton(id, key);
     if (i === 0) b.setAttribute('aria-selected', 'true');
-    t.appendChild(b);
+    tEl.appendChild(b);
   });
   activateTab('overview');
 }

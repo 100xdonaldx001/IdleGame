@@ -2,6 +2,7 @@ import {data, skills, inventory as baseInventory, marketInventory as baseMarket}
 import {stats} from './stats.js';
 import {SAVE_KEY} from './constants.js';
 import {showToast} from './toast.js';
+import {t} from './i18n.js';
 import {el} from './utils.js';
 import {addInventory} from './helpers.js';
 import {applyUpgradeEffects} from './helpers.js';
@@ -27,7 +28,7 @@ function convertLegacyLogs() {
 export function save() {
   data.meta.last = Date.now();
   localStorage.setItem(SAVE_KEY, JSON.stringify({data, stats}));
-  showToast('Saved.');
+  showToast(t('toast_saved'));
   el('#saveInfo').textContent = 'Saved at ' + new Date(data.meta.last).toLocaleTimeString();
 }
 
