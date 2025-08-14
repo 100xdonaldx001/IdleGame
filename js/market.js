@@ -1,26 +1,23 @@
 import {data} from './data.js';
 
-export function buyItem(key) {
-  const entry = data.market[key];
-  if (!entry || entry.stock <= 0) return;
-  if (data.gold < entry.price) return;
-  data.gold -= entry.price;
-  data.inventory[key] = (data.inventory[key] || 0) + 1;
-  entry.stock--;
-}
-
-export function sellItem(key) {
+export function listItem(key, price) {
   if ((data.inventory[key] || 0) <= 0) return;
   const entry = data.market[key];
   if (!entry) return;
-  data.gold += entry.price;
+  const base = entry.base || 1;
+  price = Math.max(1, Math.floor(price));
+  if (price > base * 100) return;
   data.inventory[key]--;
-  entry.stock++;
+  data.marketQueue.push({key, price, base});
 }
 
-export function updateMarketPrices() {
-  Object.values(data.market).forEach(it => {
-    const delta = Math.random() < 0.5 ? -1 : 1;
-    it.price = Math.max(1, it.price + delta);
-  });
+export function processMarket() {
+  if (!data.marketQueue.length) return;
+  const listing = data.marketQueue[0];
+  const chance = Math.min(1, listing.base / listing.price);
+  if (Math.random() < chance) {
+    data.gold += listing.price;
+    data.marketQueue.shift();
+  }
 }
+
