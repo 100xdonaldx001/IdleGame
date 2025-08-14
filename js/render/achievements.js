@@ -7,9 +7,21 @@ export function renderAchievements() {
   achievements.forEach(a => {
     const owned = !!data.ach[a.key];
     const card = document.createElement('div'); card.className = 'panel';
-    card.innerHTML = `<div class="phead"><b>${a.name}</b><small class="muted">Reward ${a.reward}g</small></div>
-    <div class="row"><span class="chip">${owned ? 'Claimed' : 'Locked/Auto'}</span></div>`;
+    const reward = formatReward(a.reward);
+    card.innerHTML = `<div class="phead"><b>${a.name}</b><small class="muted">Reward ${reward}</small></div>` +
+      `<div class="row"><span class="chip">${owned ? 'Claimed' : 'Locked/Auto'}</span></div>`;
     g.appendChild(card);
   });
+}
+
+function formatReward(reward) {
+  if (typeof reward === 'number') return `${reward}g`;
+  if (reward && typeof reward === 'object') {
+    const parts = [];
+    if (reward.gold) parts.push(`${reward.gold}g`);
+    if (reward.xp) parts.push(`${reward.xp}xp`);
+    return parts.join(', ');
+  }
+  return '';
 }
 
