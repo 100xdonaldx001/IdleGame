@@ -8,6 +8,7 @@ import {renderFarm} from './render/farm.js';
 import {renderUpgrades} from './render/upgrades.js';
 import {renderAchievements} from './render/achievements.js';
 import {renderCombatUI} from './render/combat.js';
+import {renderMarket} from './render/market.js';
 
 export {tabButton, activateTab, renderTabs, prevTab} from './render/tabs.js';
 export {renderStats} from './render/stats.js';
@@ -21,6 +22,7 @@ export {renderUpgrades} from './render/upgrades.js';
 export {renderAchievements} from './render/achievements.js';
 export {renderCombatUI} from './render/combat.js';
 export {renderSettingsFooter} from './render/settings.js';
+export {renderMarket} from './render/market.js';
 
 export function renderAll() {
   renderStats();
@@ -29,6 +31,7 @@ export function renderAll() {
   renderOverview();
   renderInventory();
   renderEquipment();
+  renderMarket();
   renderEnchanting(null);
   renderFarm();
   renderUpgrades();
