@@ -31,6 +31,7 @@ export function renderTabs() {
     ['equipment', 'equipment_title'],
     ['upgrades', 'upgrades_title'],
     ['combat', 'combat_title'],
+    ['quests', 'Quests'],
     ['achievements', 'achievements_title'],
     ['settings', 'settings_title']
   ];
