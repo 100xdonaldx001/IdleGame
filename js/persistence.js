@@ -45,6 +45,10 @@ export function load() {
       data.market = Object.assign(JSON.parse(JSON.stringify(baseMarket)), data.market);
       if (!Array.isArray(data.equipment)) data.equipment = [];
       if (!data.equipped) data.equipped = {};
+      data.equipment.forEach(it => {
+        if (!it.ench) it.ench = {};
+        if (!it.rarity) it.rarity = 'common';
+      });
       applyUpgradeEffects();
       if (data.meta.virtualLevels == null) data.meta.virtualLevels = false;
     } catch (e) { console.warn('Load failed', e); }
@@ -82,6 +86,10 @@ export async function importSave() {
     data.market = Object.assign(JSON.parse(JSON.stringify(baseMarket)), data.market);
     if (!Array.isArray(data.equipment)) data.equipment = [];
     if (!data.equipped) data.equipped = {};
+    data.equipment.forEach(it => {
+      if (!it.ench) it.ench = {};
+      if (!it.rarity) it.rarity = 'common';
+    });
     applyUpgradeEffects();
     save();
     renderAll();
