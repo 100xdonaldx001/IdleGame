@@ -28,7 +28,16 @@ function baseSkills() {
 }
 
 export const data = {
-  meta: { version: VERSION, created: Date.now(), last: Date.now(), autosave: true, debug: false, offlineCapHrs: 8, virtualLevels: false },
+  meta: {
+    version: VERSION,
+    created: Date.now(),
+    last: Date.now(),
+    autosave: true,
+    debug: false,
+    offlineCapHrs: 8,
+    offlineSkills: ['Woodcutting', 'Mining', 'Fishing'],
+    virtualLevels: false
+  },
   gold: 0,
   xp: 0,
   skills: baseSkills(),
