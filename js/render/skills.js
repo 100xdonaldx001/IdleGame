@@ -19,7 +19,8 @@ export function renderSkills() {
     const lvlText = data.meta.virtualLevels ? actual : sk.lvl;
     const isFarm = name === 'Farming';
     const isAlchemy = name === 'Alchemy';
-    const btnText = isFarm ? 'Manage' : active ? (isAlchemy ? 'Brewing' : 'Training') : (isAlchemy ? 'Brew' : 'Train');
+    const isMagic = name === 'Magic';
+    const btnText = isFarm ? 'Manage' : active ? (isAlchemy ? 'Brewing' : isMagic ? 'Casting' : 'Training') : (isAlchemy ? 'Brew' : isMagic ? 'Cast' : 'Train');
     row.innerHTML = `<div><b>${name}</b><div class="bar"><span style="width:${pct}%"></span></div><small class="muted">Lv ${lvlText} · ${fmt(sk.xp)} XP</small></div><div class="row"><button class="btn ${active && !isFarm ? 'good' : ''}">${btnText}</button></div>`;
     const btn = row.querySelector('button');
     if (isFarm) {
@@ -85,7 +86,8 @@ export function renderTaskPanel() {
         </div>`;
       const b = document.createElement('button');
       b.className = 'btn';
-      b.textContent = sk.task === node.key ? 'Stop' : 'Train';
+      const actionLabel = skillName === 'Alchemy' ? 'Brew' : skillName === 'Magic' ? 'Cast' : 'Train';
+      b.textContent = sk.task === node.key ? 'Stop' : actionLabel;
       if (locked) b.disabled = true;
       if (sk.task === node.key) b.classList.add('good');
       b.addEventListener('click', () => {
@@ -122,7 +124,8 @@ export function renderTaskPanel() {
           </div>`;
       const b = document.createElement('button');
       b.className = 'btn';
-      b.textContent = sk.task === node.key ? 'Stop' : 'Train';
+      const actionLabel = skillName === 'Alchemy' ? 'Brew' : skillName === 'Magic' ? 'Cast' : 'Train';
+      b.textContent = sk.task === node.key ? 'Stop' : actionLabel;
       if (locked) b.disabled = true;
       if (sk.task === node.key) b.classList.add('good');
       b.addEventListener('click', () => {

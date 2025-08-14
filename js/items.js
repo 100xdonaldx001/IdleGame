@@ -72,5 +72,10 @@ export default [
   {key:'redHerb', name:'Red Herb'},
   {key:'blueHerb', name:'Blue Herb'},
   {key:'healingPotion', name:'Healing Potion'},
-  {key:'manaPotion', name:'Mana Potion'}
+  {key:'manaPotion', name:'Mana Potion'},
+  {key:'magicEssence', name:'Magic Essence'},
+  {key:'airRune', name:'Air Rune'},
+  {key:'fireRune', name:'Fire Rune'},
+  {key:'waterRune', name:'Water Rune'},
+  {key:'earthRune', name:'Earth Rune'}
 ];
