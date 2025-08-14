@@ -4,6 +4,7 @@ import mining from './Mining.js';
 import fishing from './Fishing.js';
 import smithing from './Smithing.js';
 import cooking from './Cooking.js';
+import alchemy from './Alchemy.js';
 import craft from './Craft.js';
 import combat from './Combat.js';
 
@@ -14,6 +15,7 @@ export default [
   ...fishing,
   ...smithing,
   ...cooking,
+  ...alchemy,
   ...craft,
   ...combat,
 ];

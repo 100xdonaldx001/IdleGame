@@ -4,12 +4,13 @@ import Mining from './skills/Mining/index.js';
 import Fishing from './skills/Fishing/index.js';
 import Smithing from './skills/Smithing/index.js';
 import Cooking from './skills/Cooking/index.js';
+import Alchemy from './skills/Alchemy/index.js';
 import Combat from './skills/Combat/index.js';
 import Endurance from './skills/Endurance/index.js';
 import Farming from './skills/Farming/index.js';
 import {VERSION} from './constants.js';
 
-export const skillModules = { Woodcutting, Mining, Fishing, Smithing, Cooking, Combat, Endurance, Farming };
+export const skillModules = { Woodcutting, Mining, Fishing, Smithing, Cooking, Alchemy, Combat, Endurance, Farming };
 export const skills = Object.keys(skillModules);
 export const nodes = Object.fromEntries(skills.map(k => [k, skillModules[k].nodes]));
 export const inventory = Object.fromEntries(items.map(i => [i.key, 0]));

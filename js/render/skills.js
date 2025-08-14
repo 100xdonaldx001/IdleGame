@@ -18,7 +18,8 @@ export function renderSkills() {
     const pct = sk.lvl >= 99 && !data.meta.virtualLevels ? 100 : ((sk.xp - cur) / (next - cur)) * 100;
     const lvlText = data.meta.virtualLevels ? actual : sk.lvl;
     const isFarm = name === 'Farming';
-    const btnText = isFarm ? 'Manage' : active ? 'Training' : 'Train';
+    const isAlchemy = name === 'Alchemy';
+    const btnText = isFarm ? 'Manage' : active ? (isAlchemy ? 'Brewing' : 'Training') : (isAlchemy ? 'Brew' : 'Train');
     row.innerHTML = `<div><b>${name}</b><div class="bar"><span style="width:${pct}%"></span></div><small class="muted">Lv ${lvlText} · ${fmt(sk.xp)} XP</small></div><div class="row"><button class="btn ${active && !isFarm ? 'good' : ''}">${btnText}</button></div>`;
     const btn = row.querySelector('button');
     if (isFarm) {
