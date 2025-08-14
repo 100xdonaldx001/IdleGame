@@ -68,5 +68,9 @@ export default [
   {key:'bread', name:'Bread'},
   {key:'stew', name:'Stew'},
   {key:'pie', name:'Pie'},
-  {key:'fishStew', name:'Fish Stew'}
+  {key:'fishStew', name:'Fish Stew'},
+  {key:'redHerb', name:'Red Herb'},
+  {key:'blueHerb', name:'Blue Herb'},
+  {key:'healingPotion', name:'Healing Potion'},
+  {key:'manaPotion', name:'Mana Potion'}
 ];
