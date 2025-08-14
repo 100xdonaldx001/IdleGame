@@ -26,6 +26,7 @@ export function renderTabs() {
   const list = [
     ['overview', 'Overview'],
     ['inventory', 'Inventory'],
+    ['market', 'Market'],
     ['equipment', 'Equipment'],
     ['upgrades', 'Upgrades'],
     ['combat', 'Combat'],

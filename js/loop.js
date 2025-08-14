@@ -7,8 +7,9 @@ import {craftingTick} from './crafting.js';
 import {combatTick, drawArena} from './combat.js';
 import {checkAchievements} from './achievementCheck.js';
 import {save} from './persistence.js';
-import {renderStats, renderOverview, renderInventory, renderSkills, renderFarm} from './render.js';
+import {renderStats, renderOverview, renderInventory, renderSkills, renderFarm, renderMarket} from './render.js';
 import {el, randInt} from './utils.js';
+import {updateMarketPrices} from './market.js';
 
 export function tick(dt) {
   stats.totalTicks++;
@@ -63,6 +64,10 @@ export function tick(dt) {
   }
   if (stats.totalTicks % Math.floor(1000 / TICK_MS) === 0) {
     renderFarm();
+  }
+  if (stats.totalTicks % Math.floor(10000 / TICK_MS) === 0) {
+    updateMarketPrices();
+    renderMarket();
   }
 }
 

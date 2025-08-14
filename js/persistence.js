@@ -1,4 +1,4 @@
-import {data, skills, inventory as baseInventory} from './data.js';
+import {data, skills, inventory as baseInventory, marketInventory as baseMarket} from './data.js';
 import {stats} from './stats.js';
 import {SAVE_KEY} from './constants.js';
 import {showToast} from './toast.js';
@@ -42,6 +42,7 @@ export function load() {
       Object.assign(stats, obj.stats || {});
       convertLegacyLogs();
       data.inventory = Object.assign({}, baseInventory, data.inventory);
+      data.market = Object.assign(JSON.parse(JSON.stringify(baseMarket)), data.market);
       if (!Array.isArray(data.equipment)) data.equipment = [];
       if (!data.equipped) data.equipped = {};
       applyUpgradeEffects();
@@ -78,6 +79,7 @@ export async function importSave() {
     Object.assign(stats, obj.stats || {});
     convertLegacyLogs();
     data.inventory = Object.assign({}, baseInventory, data.inventory);
+    data.market = Object.assign(JSON.parse(JSON.stringify(baseMarket)), data.market);
     if (!Array.isArray(data.equipment)) data.equipment = [];
     if (!data.equipped) data.equipped = {};
     applyUpgradeEffects();
