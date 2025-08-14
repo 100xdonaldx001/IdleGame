@@ -3,6 +3,7 @@ import {stats} from './stats.js';
 import enemies from './enemies.js';
 import {addInventory} from './helpers.js';
 import {addSkillXP} from './progress.js';
+import {updateQuestProgress} from './quests.js';
 import {randInt, clamp, el} from './utils.js';
 
 const cvs = el('#arena');
@@ -46,6 +47,7 @@ export function combatTick(dt) {
     if (e.gold) data.gold += randInt(...e.gold);
     for (const [k, [a, b]] of Object.entries(e.drops || {})) addInventory(k, randInt(a, b));
     addSkillXP('Combat', 12);
+    updateQuestProgress('kill', {enemy: e.key});
     currentEnemy = null;
     const e2 = getEnemy(data.combat.enemyKey); enemyHP = e2.hp;
     stats.slimeKills += e.key === 'Slime' ? 1 : 0; stats.fightsWon++;

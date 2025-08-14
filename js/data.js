@@ -43,4 +43,5 @@ export const data = {
   marketQueue: [],
   combat: { running: false, area: 'Glade', player: { hpMax: 10, hp: 10, atk: 4, def: 2, spd: 1.0, crit: 0.05 }, enemyKey: 'Slime', progress: 0 },
   ach: {},
+  quests: {},
 };
