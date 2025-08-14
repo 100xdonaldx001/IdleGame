@@ -43,6 +43,7 @@ export function load() {
       convertLegacyLogs();
       data.inventory = Object.assign({}, baseInventory, data.inventory);
       data.market = Object.assign(JSON.parse(JSON.stringify(baseMarket)), data.market);
+      if (!Array.isArray(data.marketQueue)) data.marketQueue = [];
       if (!Array.isArray(data.equipment)) data.equipment = [];
       if (!data.equipped) data.equipped = {};
       data.equipment.forEach(it => {
@@ -84,6 +85,7 @@ export async function importSave() {
     convertLegacyLogs();
     data.inventory = Object.assign({}, baseInventory, data.inventory);
     data.market = Object.assign(JSON.parse(JSON.stringify(baseMarket)), data.market);
+    if (!Array.isArray(data.marketQueue)) data.marketQueue = [];
     if (!Array.isArray(data.equipment)) data.equipment = [];
     if (!data.equipped) data.equipped = {};
     data.equipment.forEach(it => {
