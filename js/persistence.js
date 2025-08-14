@@ -44,6 +44,10 @@ export function load() {
       data.inventory = Object.assign({}, baseInventory, data.inventory);
       if (!Array.isArray(data.equipment)) data.equipment = [];
       if (!data.equipped) data.equipped = {};
+      data.equipment.forEach(it => {
+        if (!it.ench) it.ench = {};
+        if (!it.rarity) it.rarity = 'common';
+      });
       applyUpgradeEffects();
       if (data.meta.virtualLevels == null) data.meta.virtualLevels = false;
     } catch (e) { console.warn('Load failed', e); }
@@ -80,6 +84,10 @@ export async function importSave() {
     data.inventory = Object.assign({}, baseInventory, data.inventory);
     if (!Array.isArray(data.equipment)) data.equipment = [];
     if (!data.equipped) data.equipped = {};
+    data.equipment.forEach(it => {
+      if (!it.ench) it.ench = {};
+      if (!it.rarity) it.rarity = 'common';
+    });
     applyUpgradeEffects();
     save();
     renderAll();
