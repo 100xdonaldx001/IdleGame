@@ -3,6 +3,7 @@ import {mul, addInventory, applyUpgradeEffects} from './helpers.js';
 import {addEquipment} from './equipment.js';
 import {randInt, levelFromXP} from './utils.js';
 import {showToast} from './toast.js';
+import {updateQuestProgress} from './quests.js';
 
 export function addSkillXP(skill, amount) {
   const sk = data.skills[skill];
@@ -14,6 +15,7 @@ export function addSkillXP(skill, amount) {
     showToast(`${skill} → Lv.${sk.lvl}!`);
     if (skill === 'Endurance') applyUpgradeEffects();
   }
+  updateQuestProgress('skill', {skill, lvl: sk.lvl});
 }
 
 export const helpers = {addInventory, addEquipment, addSkillXP, randInt, mul};
