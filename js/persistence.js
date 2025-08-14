@@ -6,7 +6,7 @@ import {t} from './i18n.js';
 import {el} from './utils.js';
 import {addInventory} from './helpers.js';
 import {applyUpgradeEffects} from './helpers.js';
-import {renderAll} from './render.js';
+import {renderAll, renderSettingsFooter} from './render.js';
 
 function convertLegacyLogs() {
   const inv = data.inventory || {};
@@ -63,6 +63,7 @@ export function load() {
     farm.fields = farm.fields || 4;
     farm.plots = farm.plots || Array.from({length: farm.fields}, () => ({task: null, _prog: 0, _need: null}));
   }
+  if (!Array.isArray(data.meta.offlineSkills)) data.meta.offlineSkills = ['Woodcutting', 'Mining', 'Fishing'];
   el('#optAutosave').checked = !!data.meta.autosave;
   el('#optDebug').checked = !!data.meta.debug;
   el('#tickInfo').hidden = !data.meta.debug;
@@ -94,8 +95,10 @@ export async function importSave() {
       if (!it.rarity) it.rarity = 'common';
     });
     applyUpgradeEffects();
+    if (!Array.isArray(data.meta.offlineSkills)) data.meta.offlineSkills = ['Woodcutting', 'Mining', 'Fishing'];
     save();
     renderAll();
+    renderSettingsFooter();
     showToast('Imported.');
   } catch (e) { alert('Invalid code'); }
 }

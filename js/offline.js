@@ -10,10 +10,12 @@ export function applyOfflineProgress() {
   const capMs = (data.meta.offlineCapHrs || 8) * 3600 * 1000;
   const applyMs = Math.min(diffMs, capMs);
   if (applyMs <= 0) return 0;
-  const skillKeys = ['Woodcutting', 'Mining', 'Fishing'];
+  const skillKeys = (data.meta.offlineSkills && data.meta.offlineSkills.length ? data.meta.offlineSkills : Object.keys(nodes));
   for (const s of skillKeys) {
     const frac = mul.offlineFrac(s); if (!frac) continue;
-    const node = nodes[s][0];
+    const nodeArr = nodes[s];
+    if (!nodeArr || !nodeArr.length) continue;
+    const node = nodeArr[0];
     const effectiveSpeed = node.time / (mul.globalSpeed() * mul.skillSpeed(s));
     const cycles = Math.floor((applyMs * frac) / effectiveSpeed);
     if (cycles > 0) {
