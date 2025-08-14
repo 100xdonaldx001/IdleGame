@@ -2,6 +2,7 @@ import {data, skills, inventory as baseInventory, marketInventory as baseMarket}
 import {stats} from './stats.js';
 import {SAVE_KEY} from './constants.js';
 import {showToast} from './toast.js';
+import {t} from './i18n.js';
 import {el} from './utils.js';
 import {addInventory} from './helpers.js';
 import {applyUpgradeEffects} from './helpers.js';
@@ -27,7 +28,7 @@ function convertLegacyLogs() {
 export function save() {
   data.meta.last = Date.now();
   localStorage.setItem(SAVE_KEY, JSON.stringify({data, stats}));
-  showToast('Saved.');
+  showToast(t('toast_saved'));
   el('#saveInfo').textContent = 'Saved at ' + new Date(data.meta.last).toLocaleTimeString();
 }
 
@@ -43,6 +44,7 @@ export function load() {
       convertLegacyLogs();
       data.inventory = Object.assign({}, baseInventory, data.inventory);
       data.market = Object.assign(JSON.parse(JSON.stringify(baseMarket)), data.market);
+      if (!Array.isArray(data.marketQueue)) data.marketQueue = [];
       if (!Array.isArray(data.equipment)) data.equipment = [];
       if (!data.equipped) data.equipped = {};
       data.equipment.forEach(it => {
@@ -84,6 +86,7 @@ export async function importSave() {
     convertLegacyLogs();
     data.inventory = Object.assign({}, baseInventory, data.inventory);
     data.market = Object.assign(JSON.parse(JSON.stringify(baseMarket)), data.market);
+    if (!Array.isArray(data.marketQueue)) data.marketQueue = [];
     if (!Array.isArray(data.equipment)) data.equipment = [];
     if (!data.equipped) data.equipped = {};
     data.equipment.forEach(it => {

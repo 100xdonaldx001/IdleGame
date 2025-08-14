@@ -3,60 +3,60 @@
     <div class="row tabs" role="tablist" id="tabs"></div>
 
     <section class="panel">
-      <div class="phead"><b>Active Task</b><small id="taskETA" class="muted">—</small></div>
+      <div class="phead"><b data-i18n="active_task"></b><small id="taskETA" class="muted">—</small></div>
       <div id="taskPanel"></div>
     </section>
 
     <section class="panel" id="tab-overview" role="tabpanel">
-      <div class="phead"><b>Overview</b><small class="muted">A compact look at your empire</small></div>
+      <div class="phead"><b data-i18n="overview_title"></b><small class="muted" data-i18n="overview_hint"></small></div>
       <div class="grid" id="overviewGrid"></div>
     </section>
 
     <section class="panel" id="tab-inventory" role="tabpanel" hidden>
-      <div class="phead"><b>Inventory</b><small class="muted">Raw resources & materials</small></div>
+      <div class="phead"><b data-i18n="inventory_title"></b><small class="muted" data-i18n="inventory_hint"></small></div>
       <div class="grid" id="invGrid"></div>
     </section>
 
     <section class="panel" id="tab-market" role="tabpanel" hidden>
-      <div class="phead"><b>Market</b><small class="muted">Trade goods</small></div>
+      <div class="phead"><b data-i18n="market_title"></b><small class="muted" data-i18n="market_hint"></small></div>
       <div class="grid" id="marketGrid"></div>
     </section>
 
     <section class="panel" id="tab-equipment" role="tabpanel" hidden>
-      <div class="phead"><b>Equipment</b><small class="muted">Manage your tools</small></div>
+      <div class="phead"><b data-i18n="equipment_title"></b><small class="muted" data-i18n="equipment_hint"></small></div>
       <div class="grid" id="eqGrid"></div>
       <div id="enchantPanel" hidden></div>
     </section>
   
     <section class="panel" id="tab-upgrades" role="tabpanel" hidden>
-      <div class="phead"><b>Upgrades</b><small class="muted">Temporary boosts</small></div>
+      <div class="phead"><b data-i18n="upgrades_title"></b><small class="muted" data-i18n="upgrades_hint"></small></div>
       <div class="row">
-        <span class="muted">Filter</span>
+        <span class="muted" data-i18n="filter"></span>
         <select id="upgFilter">
-          <option value="all">All</option>
+          <option value="all" data-i18n="filter_all"></option>
         </select>
       </div>
       <div class="grid" id="upgGrid"></div>
     </section>
 
     <section class="panel" id="tab-farming" role="tabpanel" hidden>
-      <div class="phead"><b>Farming</b><small class="muted">Manage your fields</small></div>
+      <div class="phead"><b data-i18n="farming_title"></b><small class="muted" data-i18n="farming_hint"></small></div>
       <div class="grid" id="farmGrid"></div>
     </section>
 
     <section class="panel" id="tab-combat" role="tabpanel" hidden>
-      <div class="phead"><b>Combat</b><small class="muted">Auto-battle for loot</small></div>
+      <div class="phead"><b data-i18n="combat_title"></b><small class="muted" data-i18n="combat_hint"></small></div>
       <div class="split">
         <div>
           <canvas id="arena" width="480" height="320"></canvas>
           <div class="row" style="margin-top:8px">
-            <button class="btn" id="btnFight">Start/Stop</button>
-            <span class="chip" id="combatInfo">Idle</span>
+            <button class="btn" id="btnFight" data-i18n="combat_start"></button>
+            <span class="chip" id="combatInfo" data-i18n="combat_idle"></span>
           </div>
         </div>
         <div>
           <div class="list" id="combatStats"></div>
-          <div class="phead" style="margin-top:10px"><b>Enemies</b><small class="muted">Stronger foes, better loot</small></div>
+          <div class="phead" style="margin-top:10px"><b data-i18n="combat_enemies"></b><small class="muted" data-i18n="combat_enemies_hint"></small></div>
           <div class="list" id="enemyList"></div>
         </div>
       </div>
@@ -68,25 +68,26 @@
     </section>
 
     <section class="panel" id="tab-achievements" role="tabpanel" hidden>
-      <div class="phead"><b>Achievements</b><small class="muted">Flex a little</small></div>
+      <div class="phead"><b data-i18n="achievements_title"></b><small class="muted" data-i18n="achievements_hint"></small></div>
       <div class="grid" id="achGrid"></div>
     </section>
 
     <section class="panel" id="tab-settings" role="tabpanel" hidden>
-      <div class="phead"><b>Settings</b><small class="muted">QoL, data & tests</small></div>
+      <div class="phead"><b data-i18n="settings_title"></b><small class="muted" data-i18n="settings_hint"></small></div>
       <div class="list">
-        <label class="item"><span>Autosave every 30s</span><input type="checkbox" id="optAutosave"></label>
-        <label class="item"><span>Enable debug</span><input type="checkbox" id="optDebug"></label>
-        <label class="item"><span>Enable virtual levels</span><input type="checkbox" id="optVirtualLevels"></label>
-        <div class="item"><span>Offline progress cap</span><span><input type="number" id="optOfflineHours" min="0" max="24" step="1" style="width:70px"> h</span></div>
+        <label class="item"><span data-i18n="opt_autosave"></span><input type="checkbox" id="optAutosave"></label>
+        <label class="item"><span data-i18n="opt_debug"></span><input type="checkbox" id="optDebug"></label>
+        <label class="item"><span data-i18n="opt_virtual_levels"></span><input type="checkbox" id="optVirtualLevels"></label>
+        <label class="item"><span data-i18n="language"></span><select id="optLanguage"></select></label>
+        <div class="item"><span data-i18n="opt_offline_cap"></span><span><input type="number" id="optOfflineHours" min="0" max="24" step="1" style="width:70px"> h</span></div>
       </div>
       <div class="footer">
-        <button class="btn" id="btnSaveNow">Save Now</button>
-        <button class="btn" id="btnClaimOffline">Reapply Offline Gain</button>
-        <button class="btn" id="btnRunTests" title="Run built-in sanity tests">Run Built‑in Tests</button>
+        <button class="btn" id="btnSaveNow" data-i18n="btn_save"></button>
+        <button class="btn" id="btnClaimOffline" data-i18n="btn_claim"></button>
+        <button class="btn" id="btnRunTests" data-i18n="btn_tests" data-i18n-title="btn_tests"></button>
       </div>
-      <p class="hint" id="testResults">Tests: not run yet.</p>
-      <p class="hint">All data is stored locally in <code>localStorage</code>.</p>
+      <p class="hint" id="testResults" data-i18n="tests_not_run"></p>
+      <p class="hint" data-i18n-html="local_storage_hint"></p>
     </section>
 
   </div>

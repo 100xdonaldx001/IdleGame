@@ -9,7 +9,7 @@ import {checkAchievements} from './achievementCheck.js';
 import {save} from './persistence.js';
 import {renderStats, renderOverview, renderInventory, renderSkills, renderFarm, renderMarket, renderQuests} from './render.js';
 import {el, randInt} from './utils.js';
-import {updateMarketPrices} from './market.js';
+import {processMarket} from './market.js';
 
 export function tick(dt) {
   stats.totalTicks++;
@@ -67,7 +67,7 @@ export function tick(dt) {
     renderFarm();
   }
   if (stats.totalTicks % Math.floor(10000 / TICK_MS) === 0) {
-    updateMarketPrices();
+    processMarket();
     renderMarket();
   }
 }

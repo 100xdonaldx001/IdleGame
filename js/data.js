@@ -15,7 +15,7 @@ export const skills = Object.keys(skillModules);
 export const nodes = Object.fromEntries(skills.map(k => [k, skillModules[k].nodes]));
 export const inventory = Object.fromEntries(items.map(i => [i.key, 0]));
 export const itemMap = Object.fromEntries(items.map(i => [i.key, i.name]));
-export const marketInventory = Object.fromEntries(items.map(i => [i.key, {price: 10, stock: 10}]));
+export const marketInventory = Object.fromEntries(items.map(i => [i.key, {base: 10}]));
 
 function baseSkills() {
   const obj = {};
@@ -39,6 +39,7 @@ export const data = {
   craftingQueue: [],
   activeSkill: 'Woodcutting',
   market: JSON.parse(JSON.stringify(marketInventory)),
+  marketQueue: [],
   combat: { running: false, area: 'Glade', player: { hpMax: 10, hp: 10, atk: 4, def: 2, spd: 1.0, crit: 0.05 }, enemyKey: 'Slime', progress: 0 },
   ach: {},
   quests: {},
