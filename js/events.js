@@ -14,7 +14,11 @@ export function initEvents() {
   el('#btnExport').addEventListener('click', exportSave);
   el('#btnImport').addEventListener('click', importSave);
   el('#btnHardReset').addEventListener('click', hardReset);
-  el('#btnClaimOffline').addEventListener('click', () => { const ms = applyOfflineProgress(); renderAll(); showToast(`Applied ${Math.floor(ms / 60000)} min of offline.`); });
+  el('#btnClaimOffline').addEventListener('click', () => {
+    const ms = applyOfflineProgress();
+    renderAll();
+    showToast(`Applied ${Math.floor(ms / 60000)} min of offline.`);
+  });
   el('#btnRunTests').addEventListener('click', () => runTests());
   el('#optAutosave').addEventListener('change', e => { data.meta.autosave = e.target.checked; });
   el('#optDebug').addEventListener('change', e => {
@@ -25,19 +29,33 @@ export function initEvents() {
     renderStats();
   });
   el('#optVirtualLevels').addEventListener('change', e => { data.meta.virtualLevels = e.target.checked; renderSkills(); });
-  el('#optOfflineHours').addEventListener('change', e => { data.meta.offlineCapHrs = clamp(parseInt(e.target.value || '8'), 0, 24); e.target.value = data.meta.offlineCapHrs; });
+  el('#optOfflineHours').addEventListener('change', e => {
+    data.meta.offlineCapHrs = clamp(parseInt(e.target.value || '8'), 0, 24);
+    e.target.value = data.meta.offlineCapHrs;
+  });
 
   const os = el('#optOfflineSkills');
   if (os) {
     os.addEventListener('change', () => {
-      data.meta.offlineSkills = Array.from(os.querySelectorAll('.optOfflineSkill:checked')).map(c => c.value);
+      data.meta.offlineSkills = Array.from(
+        os.querySelectorAll('.optOfflineSkill:checked')
+      ).map(c => c.value);
+    });
+  }
+
   const ql = el('#questList');
   if (ql) {
     ql.addEventListener('click', e => {
       const c = e.target.dataset.claim;
       const go = e.target.dataset.goto;
-      if (c) { if (claimQuestReward(c)) { renderQuests(); renderStats(); } }
+      if (c) {
+        if (claimQuestReward(c)) {
+          renderQuests();
+          renderStats();
+        }
+      }
       if (go) activateTab(go);
     });
   }
 }
+
